@@ -1,14 +1,57 @@
+from pydantic import BaseModel, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class AppConfig(BaseModel):
+    host: str
+    port: int
+    reload: bool
+
+
+class PostgresConfig(BaseModel):
+    host: str
+    port: int
+    user: str
+    password: SecretStr
+    database: str
+
+    @property
+    def url(self) -> str:
+        return (
+            f"postgresql+psycopg://{self.user}"
+            f":{self.password.get_secret_value()}"
+            f"@{self.host}:{self.port}/{self.database}"
+        )
+
+
+class ProjectConfig(BaseModel):
+    name: str
+    env: str
+
+
+class PaymentApiConfig(BaseModel):
+    base_url: str
+
+
+class ProtectionApiConfig(BaseModel):
+    base_url: str
+
+
+class ConnectorsConfig(BaseModel):
+    payment: PaymentApiConfig
+    protection: ProtectionApiConfig
+
+
+class BookingConfig(BaseModel):
+    ttl_minutes: int
+
+
 class Settings(BaseSettings):
-    PROJECT_NAME: str
-    ENV: str
-    DEBUG: bool
-    DATABASE_URL: str
-    PAYMENT_API_URL: str
-    PROTECTION_API_URL: str
-    BOOKING_TTL_MINUTES: int
+    app: AppConfig
+    project: ProjectConfig
+    postgres: PostgresConfig
+    connectors: ConnectorsConfig
+    booking: BookingConfig
 
     model_config = SettingsConfigDict(
         env_file=".env.dev",

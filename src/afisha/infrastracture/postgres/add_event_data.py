@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from afisha.infrastracture.postgres.db import engine
+# from afisha.infrastracture.postgres.db import engine
 from afisha.infrastracture.postgres.models import Event, EventSeat, Location, Seat
 
 

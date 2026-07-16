@@ -9,4 +9,4 @@ RUN uv sync --no-dev --no-install-project
 
 COPY . .
 
-CMD ["uv", "run", "--no-sync", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uv", "run", "--no-sync", "uvicorn", "afisha.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

@@ -1,26 +1,30 @@
-from contextlib import asynccontextmanager
+import logging
+import uvicorn
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
-from afisha.api.routes import root_router
-from afisha.infrastracture.postgres.add_event_data import add_event_data_to_db
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    await add_event_data_to_db()
-    yield
+from afisha.application.app import create_fastapi_app
+from afisha.core.config import Settings
+from afisha.core.logging_config import setup_logging
 
 
-app = FastAPI(title="API Афиши", lifespan=lifespan)
+logger = logging.getLogger(__name__)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
+settings = Settings()
+
+setup_logging()
+logger.info(
+    "Afisha service is configured host=%s port=%s reload=%s",
+    settings.app.host,
+    settings.app.port,
+    settings.app.reload
 )
 
-app.include_router(root_router)
+app = create_fastapi_app(settings)
+
+if __name__ == "__main__":
+    uvicorn.run(
+        "afisha.main:app",
+        host=settings.app.host,
+        port=settings.app.port,
+        reload=settings.app.reload,
+        loop="uvloop",
+    )
