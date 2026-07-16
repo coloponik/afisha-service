@@ -4,8 +4,8 @@ from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from app.config import DATABASE_URL
-from app.models import Base
+from afisha.core.config import DATABASE_URL
+from afisha.infrastracture.postgres.models import Base
 
 config = context.config
 config.set_main_option("sqlalchemy.url", DATABASE_URL)

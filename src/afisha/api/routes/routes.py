@@ -1,8 +1,8 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, status
+from fastapi import APIRouter, Depends, Header
 
-from app.schemas import (
+from afisha.application.dto import (
     BookingCreate,
     CheckoutResponse,
     EventCreate,

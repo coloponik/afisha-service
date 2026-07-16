@@ -3,8 +3,8 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db import engine
-from app.models import Event, EventSeat, Location, Seat
+from afisha.infrastracture.postgres.db import engine
+from afisha.infrastracture.postgres.models import Event, EventSeat, Location, Seat
 
 
 async def add_event_data_to_db() -> None:
