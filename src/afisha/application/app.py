@@ -1,3 +1,4 @@
+from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -6,7 +7,7 @@ from afisha.application.lifespan import lifespan
 from afisha.core.config import Settings
 
 
-def create_fastapi_app(settings: Settings) -> FastAPI:
+def create_fastapi_app(settings: Settings, container) -> FastAPI:
     app = FastAPI(title="API Афиши", lifespan=lifespan, debug=False)
 
     app.add_middleware(
@@ -16,6 +17,8 @@ def create_fastapi_app(settings: Settings) -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    setup_dishka(container=container, app=app)
 
     app.include_router(root_router)
     return app

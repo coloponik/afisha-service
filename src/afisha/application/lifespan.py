@@ -11,7 +11,9 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Afisha's lifespan is started")
+    logger.info("Afisha lifespan started")
     # await add_event_data_to_db()
-    yield
-    logger.info("Afisha's shutdown started")
+    try:
+        yield
+    finally:
+        logger.info("Afisha shutdown started")

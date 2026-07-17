@@ -3,6 +3,7 @@ import uvicorn
 
 from afisha.application.app import create_fastapi_app
 from afisha.core.config import Settings
+from afisha.core.container import create_container
 from afisha.core.logging_config import setup_logging
 
 
@@ -18,7 +19,8 @@ logger.info(
     settings.app.reload
 )
 
-app = create_fastapi_app(settings)
+container = create_container(settings)
+app = create_fastapi_app(settings, container)
 
 if __name__ == "__main__":
     uvicorn.run(
