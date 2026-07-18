@@ -1,8 +1,10 @@
+from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter
 
 from afisha.api.dependencies import CurrentUserId
 from afisha.application.dto import EventRead, EventSeatRead, BookingCreate, CheckoutResponse
+from afisha.services.booking import BookingService
 
 router = APIRouter(prefix="/events", route_class=DishkaRoute, tags=["Мероприятие"])
 
@@ -30,9 +32,12 @@ async def prepare_checkout(
     event_id: int,
     payload: BookingCreate,
     user_id: CurrentUserId,
+    service: FromDishka[BookingService]
 ) -> CheckoutResponse:
     """Временно бронирует места за клиентом, возвращает итоговую стоимость
         и возможность страховки."""
-    # TODO: создать бронь для выбранных мест через SELECT FOR UPDATE, и посчитать базовую стоимость.
-    # TODO: конкурентно запросить Payment API и Protection API для расчета checkout.
-    ...
+    return await service.reserve(
+        event_id=event_id,
+        payload=payload,
+        user_id=user_id
+    )

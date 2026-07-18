@@ -14,6 +14,9 @@ class PostgresConfig(BaseModel):
     user: str
     password: SecretStr
     database: str
+    echo: bool = False
+    pool_size: int = 10
+    max_overflow: int = 20
 
     @property
     def url(self) -> str:
