@@ -2,6 +2,7 @@ from datetime import datetime
 
 from sqlalchemy import insert
 
+from afisha.application.dto import CheckoutBooking
 from afisha.infrastracture.postgres.models import Booking
 from afisha.infrastracture.postgres.repositories.base import BaseRepo
 
@@ -17,7 +18,7 @@ class BookingRepo(BaseRepo):
             with_protection: bool,
             status: str,
             reserved_until: datetime
-    ) -> int:
+    ) -> Booking:
         stmt = (
             insert(Booking)
             .values(
@@ -30,9 +31,11 @@ class BookingRepo(BaseRepo):
                 status=status,
                 reserved_until=reserved_until
             )
-            .returning(Booking.id)
+            .returning(Booking)
         )
 
-        booking_id = await self.session.scalar(stmt)
+        res = await self.session.execute(stmt)
+        booking = res.scalar_one()
 
-        return booking_id
+        return booking
+

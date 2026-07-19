@@ -1,7 +1,7 @@
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, insert
 
 from afisha.application.dto import EventSeatRead
-from afisha.infrastracture.postgres.models import EventSeat
+from afisha.infrastracture.postgres.models import EventSeat, SeatStatus
 from afisha.infrastracture.postgres.repositories.base import BaseRepo
 
 
@@ -23,5 +23,7 @@ class EventSeatRepo(BaseRepo):
 
         return list(seats)
 
-    async def reserve_seats(self, seat_ids: list[int]) -> None:
-        pass
+    async def reserve_seats(self, event_seats: list[EventSeat], reserved_until) -> None:
+        for seat in event_seats:
+            seat.status = SeatStatus.reserved
+            seat.reserved_until = reserved_until
