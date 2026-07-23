@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy import insert
 
-from afisha.application.dto import CheckoutBooking
+from afisha.application.dto import BookingRead
 from afisha.infrastracture.postgres.models import Booking
 from afisha.infrastracture.postgres.repositories.base import BaseRepo
 
@@ -18,7 +18,7 @@ class BookingRepo(BaseRepo):
             with_protection: bool,
             status: str,
             reserved_until: datetime
-    ) -> Booking:
+    ) -> BookingRead:
         stmt = (
             insert(Booking)
             .values(
@@ -37,5 +37,14 @@ class BookingRepo(BaseRepo):
         res = await self.session.execute(stmt)
         booking = res.scalar_one()
 
-        return booking
-
+        return BookingRead(
+            id=booking.id,
+            event_id=booking.event_id,
+            user_id=booking.user_id,
+            amount=booking.amount,
+            payment_commission=booking.payment_commission,
+            protection_price=booking.protection_price,
+            with_protection=booking.with_protection,
+            status=booking.status,
+            reserved_until=booking.reserved_until
+        )

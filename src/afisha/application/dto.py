@@ -69,6 +69,18 @@ class BookingCreate(BaseModel):
     seat_ids: list[int] = Field(min_length=1)
 
 
+class BookingRead(BaseModel):
+    id: int
+    event_id: int
+    user_id: int
+    amount: int
+    payment_commission: int
+    protection_price: int | None
+    with_protection: bool
+    status: BookingStatus
+    reserved_until: datetime
+
+
 class SalesDashboard(BaseModel):
     paid_orders: int
     sold_tickets: int
