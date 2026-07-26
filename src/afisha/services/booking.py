@@ -1,10 +1,15 @@
 import asyncio
 import datetime
+import logging
 
 from sqlalchemy.exc import OperationalError
 
 from afisha.application.dto import CheckoutResponse, CheckoutBooking
+from afisha.exceptions import SeatAlreadyReservedError, SeatsNotFoundError
 from afisha.infrastracture.postgres.models import BookingStatus, EventSeat, SeatStatus, Booking
+
+
+logger = logging.getLogger(__name__)
 
 
 class BookingService:
@@ -62,37 +67,33 @@ class BookingService:
             event_id: int,
             seat_ids: list[int]
     ) -> tuple[int, datetime]:
-        try:
-            async with self.db.transaction() as db:
-                event_seats = await db.events_seats.get_event_seats(
-                    event_id=event_id,
-                    seat_ids=seat_ids
-                )
+        async with self.db.transaction() as db:
+            event_seats = await db.events_seats.get_event_seats(
+                event_id=event_id,
+                seat_ids=seat_ids
+            )
 
-                self.validate_event_seats(event_seats, seat_ids)
+            self.validate_event_seats(event_seats, seat_ids)
 
-                amount = sum(seat.price for seat in event_seats)
-                reserved_until = datetime.datetime.now(datetime.UTC) + datetime.timedelta(
-                    minutes=15)
+            amount = sum(seat.price for seat in event_seats)
+            reserved_until = datetime.datetime.now(datetime.UTC) + datetime.timedelta(
+                minutes=15)
 
-                await db.events_seats.reserve_seats(
-                    event_seats=event_seats,
-                    reserved_until=reserved_until
-                )
-        except OperationalError:
-            # raise SeatAlreadyReserved()
-            pass
+            await db.events_seats.reserve_seats(
+                event_seats=event_seats,
+                reserved_until=reserved_until
+            )
 
         return amount, reserved_until
 
     def validate_event_seats(self, event_seats: list[EventSeat], seat_ids: list[int]) -> None:
         if len(event_seats) != len(seat_ids):
-            # raise SeatNotFoundError()
+            raise SeatsNotFoundError()
             pass
 
         for seat in event_seats:
             if seat.status != SeatStatus.available:
-                # raise SeatAlreadyReserved()
+                raise SeatAlreadyReservedError()
                 pass
 
     async def _build_checkout_booking(self, booking: Booking, event, seats) -> CheckoutBooking:
