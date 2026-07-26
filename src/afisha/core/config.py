@@ -34,10 +34,12 @@ class ProjectConfig(BaseModel):
 
 class PaymentApiConfig(BaseModel):
     base_url: str
+    timeout: float = 3.0
 
 
 class ProtectionApiConfig(BaseModel):
     base_url: str
+    timeout: float = 3.0
 
 
 class ConnectorsConfig(BaseModel):
