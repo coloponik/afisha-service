@@ -2,6 +2,10 @@ from dishka import Provider, provide, Scope
 
 from afisha.core.config import Settings, AppConfig, ProjectConfig, PostgresConfig, \
     ConnectorsConfig, BookingConfig
+from afisha.infrastracture.api_connectors.internal.payment import PaymentConnector
+from afisha.infrastracture.api_connectors.internal.protection import ProtectionConnector
+from afisha.infrastracture.postgres.manager import DatabaseManager
+from afisha.services.booking import BookingService
 
 
 class ConfigProvider(Provider):
@@ -35,4 +39,15 @@ class ConfigProvider(Provider):
 
 
 class ServiceProvider(Provider):
-    pass
+    @provide(scope=Scope.REQUEST)
+    def get_booking_service(
+            self,
+            db: DatabaseManager,
+            payment_connector: PaymentConnector,
+            protection_connector: ProtectionConnector
+    ) -> BookingService:
+        return BookingService(
+            db=db,
+            payment_connector=payment_connector,
+            protection_connector=protection_connector
+        )
