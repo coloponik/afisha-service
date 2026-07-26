@@ -31,15 +31,10 @@ class BookingService:
         with_protection = False
         protection = None
 
-        task_payment = await asyncio.create_task(
-            self.payment_connector.get_commision()
-        )
-        task_protection = await asyncio.create_task(
-            self.protection_connector.get_protection_price()
-        )
+        task_payment = asyncio.create_task(self.payment_connector.get_commision())
+        task_protection = asyncio.create_task(self.protection_connector.get_protection_price())
 
-        payment = task_payment.result()
-        protection = task_protection.result() or None
+        payment, protection = await asyncio.gather(task_payment, task_protection)
 
         booking = await self.db.booking.add_booking(
             event_id=event_id,
