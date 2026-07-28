@@ -4,12 +4,16 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from afisha.api.exception_handlers import setup_exception_handlers
 from afisha.api.routes import root_router
-from afisha.application.lifespan import lifespan
+from afisha.application.lifespan import create_lifespan
 from afisha.core.config import Settings
 
 
 def create_fastapi_app(settings: Settings, container) -> FastAPI:
-    app = FastAPI(title="API Афиши", lifespan=lifespan, debug=False)
+    app = FastAPI(
+        title="API Афиши",
+        lifespan=create_lifespan(container),
+        debug=False
+    )
 
     app.add_middleware(
         CORSMiddleware,
