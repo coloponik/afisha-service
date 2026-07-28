@@ -74,7 +74,7 @@ class BookingRead(BaseModel):
     event_id: int
     user_id: int
     amount: int
-    payment_commission: int
+    payment_commission: int | None
     protection_price: int | None
     with_protection: bool
     status: BookingStatus
