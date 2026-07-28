@@ -12,7 +12,7 @@ class BaseHTTPConnector:
             headers: dict[str, str] | None = None,
             rate_limit_requests: int | None = None,
             rate_limit_interval: int | None = None,
-            retry_count: int = 2
+            retry_count: int = 5
     ) -> None:
         self._client = httpx.AsyncClient(base_url=base_url, headers=headers, timeout=timeout)
         self.rate_limit_requests = rate_limit_requests
