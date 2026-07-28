@@ -18,7 +18,7 @@ class PostgresProvider(Provider):
         await postgres.close()
 
     @provide(scope=Scope.REQUEST)
-    def get_db(self, postgres: PostgresClient) -> AsyncIterator[DatabaseManager]:
+    async def get_db(self, postgres: PostgresClient) -> AsyncIterator[DatabaseManager]:
         async with postgres.session() as db:
             yield db
 
