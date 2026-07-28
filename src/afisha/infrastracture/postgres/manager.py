@@ -4,7 +4,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine, create_async_engin
     async_sessionmaker
 
 from afisha.core.config import PostgresConfig
-from afisha.infrastracture.postgres.repositories.booking import BookingRepo
+from afisha.infrastracture.postgres.repositories.bookings import BookingRepo
+from afisha.infrastracture.postgres.repositories.event_seats import EventSeatRepo
+from afisha.infrastracture.postgres.repositories.events import EventRepo
+from afisha.infrastracture.postgres.repositories.seats import SeatRepo
 
 
 class PostgresClient:
@@ -20,12 +23,12 @@ class PostgresClient:
         self._session_maker = async_sessionmaker(
             bind=self._engine,
             expire_on_commit=False,
-            autoflash=False
+            autoflush=False
         )
 
     @asynccontextmanager
     async def session(self):
-        async with self._session_maker as session:
+        async with self._session_maker() as session:
             db = DatabaseManager(session, self._session_maker)
             try:
 
@@ -33,6 +36,9 @@ class PostgresClient:
             except Exception:
                 await db.rollback()
                 raise
+    @property
+    def session_maker(self):
+        return self._session_maker
 
     async def close(self):
         await self._engine.dispose()
@@ -45,7 +51,7 @@ class DatabaseManager:
 
     @asynccontextmanager
     async def transaction(self):
-        async with self.session_maker as new_session:
+        async with self.session_maker() as new_session:
             db = DatabaseManager(new_session, self.session_maker)
             try:
                 yield db
@@ -63,4 +69,16 @@ class DatabaseManager:
     @property
     def bookings(self) -> BookingRepo:
         return BookingRepo(self.session)
+
+    @property
+    def event_seats(self) -> EventSeatRepo:
+        return EventSeatRepo(self.session)
+
+    @property
+    def events(self) -> EventRepo:
+        return EventRepo(self.session)
+
+    @property
+    def seats(self) -> SeatRepo:
+        return SeatRepo(self.session)
 
