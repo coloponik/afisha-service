@@ -1,6 +1,7 @@
 from sqlalchemy import select
 
 from afisha.application.dto import EventRead
+from afisha.exceptions import EventNotFoundError
 from afisha.infrastracture.postgres.models import Event
 from afisha.infrastracture.postgres.repositories.base import BaseRepo
 
@@ -15,8 +16,7 @@ class EventRepo(BaseRepo):
         event = await self.session.scalar(query)
 
         if event is None:
-            # raise EventNotFoundError()
-            pass
+            raise EventNotFoundError()
 
         return EventRead(
             id=event.id,

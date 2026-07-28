@@ -7,6 +7,10 @@ class BookingError(DomainError):
     pass
 
 
+class PaymentUnavailableError(BookingError):
+    pass
+
+
 class SeatAlreadyReservedError(BookingError):
     pass
 
@@ -14,3 +18,10 @@ class SeatAlreadyReservedError(BookingError):
 class SeatsNotFoundError(BookingError):
     pass
 
+
+class EventError(DomainError):
+    pass
+
+
+class EventNotFoundError(EventError):
+    pass
