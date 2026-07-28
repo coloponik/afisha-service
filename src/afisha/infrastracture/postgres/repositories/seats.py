@@ -20,7 +20,7 @@ class SeatRepo(BaseRepo):
                 id=seat.id,
                 location_id=seat.location_id,
                 sector=seat.sector,
-                row=seat.row,
+                row=str(seat.row),
                 number=seat.number,
                 x=seat.x,
                 y=seat.y
