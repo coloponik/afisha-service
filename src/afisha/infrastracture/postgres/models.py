@@ -1,7 +1,7 @@
 import enum
-from datetime import datetime, timezone
+from datetime import datetime
 
-from sqlalchemy import DateTime, Enum as SAEnum, ForeignKey, UniqueConstraint, func
+from sqlalchemy import DateTime, Enum as SAEnum, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -75,7 +75,7 @@ class Booking(Base):
     event_id: Mapped[int] = mapped_column(ForeignKey("events.id"), index=True)
     user_id: Mapped[int] = mapped_column(index=True)
     amount: Mapped[int]  # суммарная стоимость всех выбранных мест
-    payment_commission: Mapped[int]
+    payment_commission: Mapped[int | None]
     protection_price: Mapped[int | None]
     with_protection: Mapped[bool]
     status: Mapped[BookingStatus] = mapped_column(

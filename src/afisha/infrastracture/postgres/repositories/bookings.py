@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import insert
+from sqlalchemy import insert, update
 
 from afisha.application.dto import BookingRead
 from afisha.infrastracture.postgres.models import Booking
@@ -8,13 +8,13 @@ from afisha.infrastracture.postgres.repositories.base import BaseRepo
 
 
 class BookingRepo(BaseRepo):
-    async def add_booking(
+    async def create_booking(
             self,
             event_id: int,
             user_id: int,
             amount: int,
-            payment_commission: int,
-            protection_price: int,
+            payment_commission: int | None,
+            protection_price: int | None,
             with_protection: bool,
             status: str,
             reserved_until: datetime
@@ -48,3 +48,22 @@ class BookingRepo(BaseRepo):
             status=booking.status,
             reserved_until=booking.reserved_until
         )
+
+    async def update_checkout_details(
+            self,
+            booking_id: int,
+            payment_commission: int | None,
+            protection_price: int | None,
+            with_protection: bool,
+    ) -> None:
+        stmt = (
+            update(Booking)
+            .where(Booking.id == booking_id)
+            .values(
+                payment_commission=payment_commission,
+                protection_price=protection_price,
+                with_protection=with_protection
+            )
+        )
+
+        await self.session.execute(stmt)
