@@ -20,7 +20,7 @@ class ProtectionConnector(BaseHTTPConnector):
                 "booking_id": booking_id,
                 "ticket_amount": ticket_amount,
                 "event_category": event_category,
-                "event_starts_at": event_starts_at
+                "event_starts_at": event_starts_at.isoformat()
             }
         )
         response.raise_for_status()
