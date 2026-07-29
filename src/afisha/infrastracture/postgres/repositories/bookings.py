@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import insert, update
 
 from afisha.application.dto import BookingRead
-from afisha.infrastracture.postgres.models import Booking
+from afisha.infrastracture.postgres.models import Booking, BookingStatus
 from afisha.infrastracture.postgres.repositories.base import BaseRepo
 
 
@@ -63,6 +63,17 @@ class BookingRepo(BaseRepo):
                 payment_commission=payment_commission,
                 protection_price=protection_price,
                 with_protection=with_protection
+            )
+        )
+
+        await self.session.execute(stmt)
+
+    async def cancel(self, booking_id: int) -> None:
+        stmt = (
+            update(Booking)
+            .where(Booking.id == booking_id)
+            .values(
+                status=BookingStatus.cancelled
             )
         )
 
