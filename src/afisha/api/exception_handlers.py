@@ -6,13 +6,17 @@ from afisha.exceptions import (
     SeatAlreadyReservedError,
     SeatsNotFoundError,
     PaymentUnavailableError,
-    EventNotFoundError
+    EventNotFoundError, SeatAlreadySoldError
 )
 
 DOMAIN_ERROR_RESPONSES: dict[type[DomainError], tuple[int, str]] = {
     SeatAlreadyReservedError: (
         status.HTTP_409_CONFLICT,
         "Seat is already reserved"
+    ),
+    SeatAlreadySoldError: (
+        status.HTTP_409_CONFLICT,
+        "Seat is already sold"
     ),
     SeatsNotFoundError: (
         status.HTTP_404_NOT_FOUND,

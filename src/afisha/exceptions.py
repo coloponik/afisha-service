@@ -15,6 +15,10 @@ class SeatAlreadyReservedError(BookingError):
     pass
 
 
+class SeatAlreadySoldError(BookingError):
+    pass
+
+
 class SeatsNotFoundError(BookingError):
     pass
 
