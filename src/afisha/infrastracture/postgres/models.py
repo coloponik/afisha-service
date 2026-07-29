@@ -110,3 +110,11 @@ class EventSeat(Base):
         ForeignKey("bookings.id"),
         index=True,
     )
+
+    def is_reserved(self, now: datetime):
+        return (
+            self.status == SeatStatus.reserved
+            and self.reserved_until is not None
+            and self.reserved_until > now
+        )
+
