@@ -28,6 +28,13 @@ logger = logging.getLogger(__name__)
 
 
 class BookingService:
+    """
+        Сервис управления бронированиями.
+
+        Отвечает за бронирование мест, взаимодействие с внешними сервисами
+        расчета оплаты и страховки, а также компенсацию при ошибках checkout.
+
+    """
     def __init__(
             self,
             db: DatabaseManager,
@@ -46,7 +53,8 @@ class BookingService:
             payload: BookingCreate,
             user_id: int
     ) -> CheckoutResponse:
-        booking = await self.prepare_booking(event_id, payload.seat_ids, user_id)
+        """Создает бронь, получает данные оплаты и страховки."""
+        booking = await self._prepare_booking(event_id, payload.seat_ids, user_id)
 
         coro_payment = self.payment_connector.get_commission(
             booking_id=booking.id,
@@ -62,26 +70,34 @@ class BookingService:
             event_category=event.category,
             event_starts_at=event.starts_at
         )
-
+        # Параллельный вызов внешних сервисов с единым timeout на обе операции,
+        # чтобы "не заставлять пользователя ждать дольше 3-х секунд"
         payment, protection = await asyncio.gather(
             asyncio.wait_for(coro_payment, timeout=3.0),
             asyncio.wait_for(coro_protection, timeout=3.0),
             return_exceptions=True
         )
 
-        payment = self._validate_payment_response(payment)
-        protection = self._handle_protection_response(protection)
+        try:
+            # Payment критичен, при ошибке оформление брони невозможно
+            payment = self._validate_payment_response(payment)
+            # Protection необязателен, при ошибке продолжаем без него
+            protection = self._handle_protection_response(protection)
 
-        protection_price = protection.price if protection else None
-        with_protection = protection.available if protection else False
+            protection_price = protection.price if protection else None
+            with_protection = protection.available if protection else False
 
-        await self.db.bookings.update_checkout_details(
-            booking_id=booking.id,
-            payment_commission=payment.commission,
-            protection_price=protection_price,
-            with_protection=with_protection
-        )
-        await self.db.commit()
+            await self.db.bookings.update_checkout_details(
+                booking_id=booking.id,
+                payment_commission=payment.commission,
+                protection_price=protection_price,
+                with_protection=with_protection
+            )
+            await self.db.commit()
+        except PaymentUnavailableError:
+            # При ошибке payment откатываем созданную бронь
+            await self._compensate_booking(booking)
+            raise
 
         booking.payment_commission = payment.commission
         booking.protection_price = protection_price
@@ -103,19 +119,21 @@ class BookingService:
             protection=protection
         )
 
-    async def prepare_booking(
+    async def _prepare_booking(
             self,
             event_id: int,
             seat_ids: list[int],
             user_id: int
     ) -> BookingRead:
+        """Создает предварительную бронь и резервирует выбранные места."""
         async with self.db.transaction() as db:
             event_seats = await db.event_seats.get_event_seats(
                 event_id=event_id,
                 seat_ids=seat_ids
             )
 
-            self.validate_event_seats(event_seats, seat_ids)
+            # Проверяем наличие и доступность мест перед резервированием
+            self._validate_event_seats(event_seats, seat_ids)
 
             amount = sum(seat.price for seat in event_seats)
             reserved_until = datetime.datetime.now(datetime.UTC) + self.booking_ttl
@@ -129,6 +147,7 @@ class BookingService:
                 event_id=event_id,
                 user_id=user_id,
                 amount=amount,
+                # Заполняется после вызова Payment API, которому нужен booking_id
                 payment_commission=None,
                 protection_price=None,
                 with_protection=False,
@@ -138,7 +157,25 @@ class BookingService:
 
         return booking
 
-    def validate_event_seats(
+    async def release_booking(self, booking_id: int) -> None:
+        """Освобождает места и отменяет бронь."""
+        async with self.db.transaction() as db:
+            await db.event_seats.release_seats(booking_id)
+            await db.bookings.cancel(booking_id)
+
+    async def _compensate_booking(self, booking: BookingRead):
+        """Выполняет компенсирующие действия при ошибке оформления брони."""
+        try:
+            await self.release_booking(booking.id)
+        except Exception:
+            logger.exception(
+                "Failed to compensate booking",
+                extra={
+                    "booking_id": booking.id
+                }
+            )
+
+    def _validate_event_seats(
             self,
             event_seats: list[EventSeat],
             seat_ids: list[int]
@@ -149,6 +186,7 @@ class BookingService:
         for seat in event_seats:
             current_time = datetime.datetime.now(datetime.UTC)
 
+            # Проверка статуса и времени истечения бронирования
             if seat.is_reserved(current_time):
                 raise SeatAlreadyReservedError()
 
@@ -173,7 +211,10 @@ class BookingService:
             reserved_until=booking.reserved_until
         )
 
-    def _build_checkout_protection(self, protection) -> ProtectionQuote | None:
+    def _build_checkout_protection(
+            self,
+            protection
+    ) -> ProtectionQuote | None:
         if protection is not None:
             return ProtectionQuote(
                 available=protection.available,
@@ -189,7 +230,7 @@ class BookingService:
     ) -> PaymentQuote:
         if isinstance(payment, Exception):
             logger.error(
-                f"FAILED to receive response from Payment API:",
+                "Payment API unavailable",
                 exc_info=payment
             )
             raise PaymentUnavailableError() from payment
@@ -207,14 +248,18 @@ class BookingService:
     ) -> ProtectionQuote | None:
         if isinstance(protection, Exception):
             logger.error(
-                f"Protection service UNAVAILABLE, continue without protection",
+                f"Protection API UNAVAILABLE, continue without protection",
                 exc_info=protection
             )
             protection = None
 
-        return ProtectionQuote(
+        return (
+            ProtectionQuote(
             available=protection.available,
             price=protection.price,
             covered_amount=protection.covered_amount,
             description=protection.description
+            )
+            if protection is not None else protection
         )
+
