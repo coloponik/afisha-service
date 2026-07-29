@@ -12,7 +12,10 @@ def create_fastapi_app(settings: Settings, container) -> FastAPI:
     app = FastAPI(
         title="API Афиши",
         lifespan=create_lifespan(container),
-        debug=False
+        debug=False,
+        swagger_ui_parameters={
+            "displayRequestDuration": True,
+        },
     )
 
     app.add_middleware(
