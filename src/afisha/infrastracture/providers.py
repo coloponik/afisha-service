@@ -32,7 +32,9 @@ class ConnectorsProvider(Provider):
         payment_config = config.payment
         connector = PaymentConnector(
             base_url=payment_config.base_url,
-            timeout=payment_config.timeout
+            timeout=payment_config.timeout,
+            rate_limit_requests=payment_config.rate_limit_requests,
+            rate_limit_interval=payment_config.rate_limit_interval
         )
 
         yield connector
@@ -47,7 +49,9 @@ class ConnectorsProvider(Provider):
         protection_config = config.protection
         connector = ProtectionConnector(
             base_url=protection_config.base_url,
-            timeout=protection_config.timeout
+            timeout=protection_config.timeout,
+            rate_limit_requests=protection_config.rate_limit_requests,
+            rate_limit_interval=protection_config.rate_limit_interval
         )
 
         yield connector

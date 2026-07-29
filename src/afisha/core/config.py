@@ -34,12 +34,16 @@ class ProjectConfig(BaseModel):
 
 class PaymentApiConfig(BaseModel):
     base_url: str
-    timeout: float = 3.0
+    timeout: float = 1.0
+    rate_limit_requests: int | None = 5
+    rate_limit_interval: int | None = 1
 
 
 class ProtectionApiConfig(BaseModel):
     base_url: str
-    timeout: float = 3.0
+    timeout: float = 2.0
+    rate_limit_requests: int | None = None
+    rate_limit_interval: int | None = None
 
 
 class ConnectorsConfig(BaseModel):
@@ -48,7 +52,7 @@ class ConnectorsConfig(BaseModel):
 
 
 class BookingConfig(BaseModel):
-    ttl_minutes: int
+    booking_ttl_minutes: int = 15
 
 
 class Settings(BaseSettings):

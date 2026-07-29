@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from dishka import Provider, provide, Scope
 
 from afisha.core.config import Settings, AppConfig, ProjectConfig, PostgresConfig, \
@@ -44,10 +46,12 @@ class ServiceProvider(Provider):
             self,
             db: DatabaseManager,
             payment_connector: PaymentConnector,
-            protection_connector: ProtectionConnector
+            protection_connector: ProtectionConnector,
+            config: BookingConfig
     ) -> BookingService:
         return BookingService(
             db=db,
             payment_connector=payment_connector,
-            protection_connector=protection_connector
+            protection_connector=protection_connector,
+            booking_ttl=timedelta(minutes=config.booking_ttl_minutes)
         )
