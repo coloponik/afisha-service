@@ -1,4 +1,4 @@
-from sqlalchemy import select, and_, insert
+from sqlalchemy import select, and_, insert, update
 
 from afisha.application.dto import EventSeatRead
 from afisha.infrastracture.postgres.models import EventSeat, SeatStatus
@@ -27,3 +27,16 @@ class EventSeatRepo(BaseRepo):
         for seat in event_seats:
             seat.status = SeatStatus.reserved
             seat.reserved_until = reserved_until
+
+    async def release_seats(self, booking_id: int) -> None:
+        stmt = (
+            update(EventSeat)
+            .where(EventSeat.booking_id == booking_id)
+            .values(
+                status=SeatStatus.available,
+                reserved_until=None,
+                booking_id=None
+            )
+        )
+
+        await self.session.execute(stmt)
