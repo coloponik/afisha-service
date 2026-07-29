@@ -12,7 +12,7 @@ class BaseHTTPConnector:
             headers: dict[str, str] | None = None,
             rate_limit_requests: int | None = None,
             rate_limit_interval: int | None = None,
-            retry_count: int = 5
+            retry_count: int = 2
     ) -> None:
         self._client = httpx.AsyncClient(base_url=base_url, headers=headers, timeout=timeout)
         self.rate_limit_requests = rate_limit_requests
@@ -29,8 +29,8 @@ class BaseHTTPConnector:
         self._rate_limiter.release()
 
     async def _exponential_backoff_sleep(self, attempt: int):
-        delay = 0.5 * 2 ** (attempt + 1)
-        jitter = random.uniform(0.1, 0.5)
+        delay = 0.2 * 2 ** (attempt + 1)
+        jitter = random.uniform(0.05, 0.2)
 
         await asyncio.sleep(delay + jitter)
 
