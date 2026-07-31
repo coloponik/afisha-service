@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from sqlalchemy import insert, update
+from sqlalchemy import insert, update, select, func, cast, Numeric, Integer, and_
 
-from afisha.application.dto import BookingRead
-from afisha.infrastracture.postgres.models import Booking, BookingStatus
+from afisha.application.dto import BookingRead, SalesRead
+from afisha.infrastracture.postgres.models import Booking, BookingStatus, EventSeat
 from afisha.infrastracture.postgres.repositories.base import BaseRepo
 
 
@@ -78,3 +78,59 @@ class BookingRepo(BaseRepo):
         )
 
         await self.session.execute(stmt)
+
+    async def get_sales(self, event_id: int, organizer_id: int) -> SalesRead:
+        sold_tickets = (
+            select(func.count(EventSeat.id))
+            .select_from(EventSeat)
+            .join(Booking,
+                  Booking.id == EventSeat.booking_id)
+            .where(
+                and_(
+                    EventSeat.event_id == event_id,
+                    Booking.status == BookingStatus.paid
+                )
+            )
+            .label("sold_tickets")
+        )
+
+        query = (
+            select(
+                func.count(Booking.id)
+                .label("paid_orders"),
+
+                sold_tickets,
+
+                func.coalesce(
+                    func.sum(Booking.amount)
+                    , 0
+                )
+                .label("revenue"),
+
+                func.coalesce(
+                    func.round(
+                        func.avg(Booking.amount)
+                    )
+                    , 0
+                )
+                .cast(Integer)
+                .label("average_order")
+            )
+            .select_from(Booking)
+            .where(
+                and_(
+                    Booking.event_id == event_id,
+                    Booking.status == BookingStatus.paid
+                )
+            )
+        )
+
+        result = await self.session.execute(query)
+        analytics = result.one()
+
+        return SalesRead(
+            paid_orders=analytics.paid_orders,
+            sold_tickets=analytics.sold_tickets,
+            revenue=analytics.revenue,
+            average_order=analytics.average_order
+        )
