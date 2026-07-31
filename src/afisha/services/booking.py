@@ -138,11 +138,6 @@ class BookingService:
             amount = sum(seat.price for seat in event_seats)
             reserved_until = datetime.datetime.now(datetime.UTC) + self.booking_ttl
 
-            await db.event_seats.reserve_seats(
-                event_seats=event_seats,
-                reserved_until=reserved_until
-            )
-
             booking = await db.bookings.create_booking(
                 event_id=event_id,
                 user_id=user_id,
@@ -153,6 +148,12 @@ class BookingService:
                 with_protection=False,
                 status=BookingStatus.pending_payment,
                 reserved_until=reserved_until
+            )
+
+            await db.event_seats.reserve_seats(
+                event_seats=event_seats,
+                reserved_until=reserved_until,
+                booking_id=booking.id
             )
 
         return booking
