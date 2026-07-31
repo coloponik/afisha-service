@@ -88,7 +88,22 @@ class SalesDashboard(BaseModel):
     average_order: int
 
 
+class SalesRead(BaseModel):
+    paid_orders: int
+    sold_tickets: int
+    revenue: int
+    average_order: int
+
+
 class OccupancyDashboard(BaseModel):
+    total: int
+    available: int
+    reserved: int
+    sold: int
+    occupancy_percent: float
+
+
+class OccupancyRead(BaseModel):
     total: int
     available: int
     reserved: int
