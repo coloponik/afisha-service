@@ -6,7 +6,10 @@ from afisha.exceptions import (
     SeatAlreadyReservedError,
     SeatsNotFoundError,
     PaymentUnavailableError,
-    EventNotFoundError, SeatAlreadySoldError
+    EventNotFoundError,
+    SeatAlreadySoldError,
+    ForbiddenError,
+    DashboardUnavailableError
 )
 
 DOMAIN_ERROR_RESPONSES: dict[type[DomainError], tuple[int, str]] = {
@@ -29,7 +32,15 @@ DOMAIN_ERROR_RESPONSES: dict[type[DomainError], tuple[int, str]] = {
     EventNotFoundError: (
         status.HTTP_404_NOT_FOUND,
         "Event not found"
-    )
+    ),
+    ForbiddenError: {
+        status.HTTP_403_FORBIDDEN,
+        "User is not the event organizer"
+    },
+    DashboardUnavailableError: {
+        status.HTTP_503_SERVICE_UNAVAILABLE,
+        "Analytics is temporarily unavailable"
+    }
 }
 
 

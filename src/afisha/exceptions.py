@@ -23,9 +23,17 @@ class SeatsNotFoundError(BookingError):
     pass
 
 
-class EventError(DomainError):
+class EventAnalyticsError(DomainError):
     pass
 
 
-class EventNotFoundError(EventError):
+class EventNotFoundError(EventAnalyticsError):
+    pass
+
+
+class ForbiddenError(EventAnalyticsError):
+    pass
+
+
+class DashboardUnavailableError(EventAnalyticsError):
     pass
