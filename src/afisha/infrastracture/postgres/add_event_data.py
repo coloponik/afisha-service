@@ -4,8 +4,15 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 # from afisha.infrastracture.postgres.db import engine
-from afisha.infrastracture.postgres.models import Event, EventSeat, Location, Seat, BookingStatus, \
-    Booking, SeatStatus
+from afisha.infrastracture.postgres.models import (
+    Booking,
+    BookingStatus,
+    Event,
+    EventSeat,
+    Location,
+    Seat,
+    SeatStatus,
+)
 
 
 async def add_event_data_to_db(session_maker: async_sessionmaker) -> None:

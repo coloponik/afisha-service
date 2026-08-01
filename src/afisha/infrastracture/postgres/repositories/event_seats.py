@@ -1,7 +1,12 @@
-from sqlalchemy import select, and_, update, func, cast, or_, Numeric, Float
+from sqlalchemy import Float, Numeric, and_, cast, func, or_, select, update
 
 from afisha.application.dto import OccupancyRead
-from afisha.infrastracture.postgres.models import EventSeat, SeatStatus, Booking, BookingStatus
+from afisha.infrastracture.postgres.models import (
+    Booking,
+    BookingStatus,
+    EventSeat,
+    SeatStatus,
+)
 from afisha.infrastracture.postgres.repositories.base import BaseRepo
 
 

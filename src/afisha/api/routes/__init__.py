@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+
 from afisha.api.routes.booking import router as booking_router
 from afisha.api.routes.event import router as event_router
 from afisha.api.routes.location import router as location_router

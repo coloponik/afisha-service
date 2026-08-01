@@ -1,9 +1,15 @@
+import httpx
 import pytest
-from dishka import Scope
+from dishka import AsyncContainer, Scope
 from sqlalchemy import select
 
 from afisha.infrastracture.postgres.manager import DatabaseManager
-from afisha.infrastracture.postgres.models import Booking, BookingStatus, EventSeat, SeatStatus
+from afisha.infrastracture.postgres.models import (
+    Booking,
+    BookingStatus,
+    EventSeat,
+    SeatStatus,
+)
 
 
 class TestPrepareCheckout:
@@ -15,7 +21,7 @@ class TestPrepareCheckout:
     )
     async def test_returns_booking_data(
             self,
-            async_client,
+            async_client: httpx.AsyncClient,
             test_event_id: int,
             test_headers: dict,
             test_json: dict
@@ -40,7 +46,7 @@ class TestPrepareCheckout:
     )
     async def test_rejects_already_reserved_seats(
             self,
-            async_client,
+            async_client: httpx.AsyncClient,
             test_event_id: int,
             test_headers: dict,
             test_json: dict
@@ -69,12 +75,12 @@ class TestPrepareCheckout:
     )
     async def test_prepare_checkout_creates_booking_and_reserves_seats(
             self,
-            async_client,
-            test_container,
+            async_client: httpx.AsyncClient,
+            test_container: AsyncContainer,
             test_event_id: int,
             test_headers: dict,
             test_json: dict
-    ):
+    ) -> None:
         response = await async_client.post(
             f"/events/{test_event_id}/checkout",
             headers=test_headers,

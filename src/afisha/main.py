@@ -1,11 +1,11 @@
 import logging
+
 import uvicorn
 
 from afisha.application.app import create_fastapi_app
 from afisha.core.config import Settings
 from afisha.core.container import create_container
 from afisha.core.logging_config import setup_logging
-
 
 logger = logging.getLogger(__name__)
 

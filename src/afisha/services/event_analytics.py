@@ -1,11 +1,15 @@
 import asyncio
 import logging
 
-from afisha.application.dto import EventDashboard, SalesDashboard, OccupancyDashboard, EventRead, \
-    SalesRead, OccupancyRead
-from afisha.exceptions import ForbiddenError, DashboardUnavailableError
+from afisha.application.dto import (
+    EventDashboard,
+    OccupancyDashboard,
+    OccupancyRead,
+    SalesDashboard,
+    SalesRead,
+)
+from afisha.exceptions import DashboardUnavailableError, ForbiddenError
 from afisha.infrastracture.postgres.manager import DatabaseManager
-
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +31,7 @@ class EventAnalyticsService:
             async with asyncio.TaskGroup() as tg:
                 task_sales = tg.create_task(self.db.bookings.get_sales(event_id, organizer_id))
                 task_occupancy = tg.create_task(self.db.event_seats.get_occupancy(event_id))
-        except* Exception as exc_group:
+        except* Exception:
             logger.exception("Failed to get analytics from DB")
             raise DashboardUnavailableError()
 

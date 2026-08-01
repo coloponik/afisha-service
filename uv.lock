@@ -16,6 +16,7 @@ dependencies = [
     { name = "psycopg", extra = ["binary", "pool"] },
     { name = "pydantic-settings" },
     { name = "pytest" },
+    { name = "ruff" },
     { name = "sqlalchemy" },
     { name = "uvicorn", extra = ["standard"] },
 ]
@@ -37,6 +38,7 @@ requires-dist = [
     { name = "psycopg", extras = ["binary", "pool"], specifier = "==3.2.9" },
     { name = "pydantic-settings", specifier = ">=2.14.2" },
     { name = "pytest", specifier = ">=9.1.1" },
+    { name = "ruff", specifier = ">=0.12.2" },
     { name = "sqlalchemy", specifier = "==2.0.41" },
     { name = "uvicorn", extras = ["standard"], specifier = "==0.35.0" },
 ]

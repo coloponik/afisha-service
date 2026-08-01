@@ -1,7 +1,9 @@
 from datetime import datetime
 
-from afisha.infrastracture.api_connectors.schemas import CalculatedPaymentData, \
-    CalculatedProtectionData
+from afisha.infrastracture.api_connectors.schemas import (
+    CalculatedPaymentData,
+    CalculatedProtectionData,
+)
 
 
 class MockPaymentConnector:
@@ -10,7 +12,7 @@ class MockPaymentConnector:
             booking_id: int,
             amount: int,
             currency: str
-    ):
+    ) -> CalculatedPaymentData:
         return CalculatedPaymentData(
             commission=10,
             total=amount + 10,
@@ -26,7 +28,7 @@ class MockProtectionConnector:
             ticket_amount: int,
             event_category: str,
             event_starts_at: datetime
-    ):
+    ) -> CalculatedProtectionData:
         return CalculatedProtectionData(
             available=False,
             price=50,

@@ -1,9 +1,15 @@
 from datetime import timedelta
 
-from dishka import Provider, provide, Scope
+from dishka import Provider, Scope, provide
 
-from afisha.core.config import Settings, AppConfig, ProjectConfig, PostgresConfig, \
-    ConnectorsConfig, BookingConfig
+from afisha.core.config import (
+    AppConfig,
+    BookingConfig,
+    ConnectorsConfig,
+    PostgresConfig,
+    ProjectConfig,
+    Settings,
+)
 from afisha.infrastracture.api_connectors.internal.payment import PaymentConnector
 from afisha.infrastracture.api_connectors.internal.protection import ProtectionConnector
 from afisha.infrastracture.postgres.manager import DatabaseManager

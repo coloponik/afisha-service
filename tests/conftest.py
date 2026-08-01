@@ -1,8 +1,10 @@
+from collections.abc import AsyncGenerator
+
 import httpx
 import pytest
-
 from asgi_lifespan import LifespanManager
-from dishka import make_async_container, AsyncContainer, Scope
+from dishka import AsyncContainer, Scope, make_async_container
+from fastapi import FastAPI
 from sqlalchemy import text
 
 from afisha.application.app import create_fastapi_app
@@ -14,7 +16,7 @@ from tests.mock_providers import MockConnectorsProvider
 
 
 @pytest.fixture(scope="session")
-def test_settings():
+def test_settings() -> Settings:
     return Settings()
 
 
@@ -28,20 +30,27 @@ def make_test_container(settings: Settings) -> AsyncContainer:
 
 
 @pytest.fixture
-async def test_container(test_settings):
+async def test_container(
+        test_settings: Settings
+) -> AsyncGenerator[AsyncContainer, None]:
     container = make_test_container(test_settings)
     yield container
     await container.close()
 
 
 @pytest.fixture
-async def test_app(test_settings, test_container):
+async def test_app(
+        test_settings: Settings,
+        test_container: AsyncContainer
+) -> FastAPI:
     app = create_fastapi_app(test_settings, test_container)
     return app
 
 
 @pytest.fixture
-async def async_client(test_app):
+async def async_client(
+        test_app: FastAPI
+) -> AsyncGenerator[httpx.AsyncClient, None]:
     async with LifespanManager(test_app):
         async with httpx.AsyncClient(
             transport=httpx.ASGITransport(app=test_app),
@@ -51,7 +60,9 @@ async def async_client(test_app):
 
 
 @pytest.fixture(autouse=True)
-async def clean_database(test_container):
+async def clean_database(
+        test_container: AsyncContainer
+) -> AsyncGenerator[None, None]:
     yield
 
     async with test_container(scope=Scope.REQUEST) as req_container:

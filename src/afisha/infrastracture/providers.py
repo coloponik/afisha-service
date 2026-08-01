@@ -2,10 +2,10 @@ from collections.abc import AsyncIterator
 
 from dishka import Provider, Scope, provide
 
-from afisha.core.config import PostgresConfig, ConnectorsConfig
+from afisha.core.config import ConnectorsConfig, PostgresConfig
 from afisha.infrastracture.api_connectors.internal.payment import PaymentConnector
 from afisha.infrastracture.api_connectors.internal.protection import ProtectionConnector
-from afisha.infrastracture.postgres.manager import PostgresClient, DatabaseManager
+from afisha.infrastracture.postgres.manager import DatabaseManager, PostgresClient
 
 
 class PostgresProvider(Provider):

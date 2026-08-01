@@ -3,26 +3,27 @@ import datetime
 import logging
 
 from afisha.application.dto import (
-    CheckoutResponse,
-    CheckoutBooking,
+    BookingCreate,
     BookingRead,
-    ProtectionQuote,
+    CheckoutBooking,
+    CheckoutResponse,
     PaymentQuote,
-    BookingCreate
+    ProtectionQuote,
 )
 from afisha.exceptions import (
-    SeatAlreadyReservedError,
-    SeatsNotFoundError,
     PaymentUnavailableError,
-    SeatAlreadySoldError
+    SeatAlreadyReservedError,
+    SeatAlreadySoldError,
+    SeatsNotFoundError,
 )
 from afisha.infrastracture.api_connectors.internal.payment import PaymentConnector
 from afisha.infrastracture.api_connectors.internal.protection import ProtectionConnector
-from afisha.infrastracture.api_connectors.schemas import CalculatedPaymentData, \
-    CalculatedProtectionData
+from afisha.infrastracture.api_connectors.schemas import (
+    CalculatedPaymentData,
+    CalculatedProtectionData,
+)
 from afisha.infrastracture.postgres.manager import DatabaseManager
 from afisha.infrastracture.postgres.models import BookingStatus, EventSeat, SeatStatus
-
 
 logger = logging.getLogger(__name__)
 
@@ -249,7 +250,7 @@ class BookingService:
     ) -> ProtectionQuote | None:
         if isinstance(protection, Exception):
             logger.error(
-                f"Protection API UNAVAILABLE, continue without protection",
+                "Protection API unavailable, continue without protection",
                 exc_info=protection
             )
             protection = None

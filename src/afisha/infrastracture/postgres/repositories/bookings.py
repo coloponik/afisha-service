@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import insert, update, select, func, cast, Numeric, Integer, and_
+from sqlalchemy import Integer, and_, func, insert, select, update
 
 from afisha.application.dto import BookingRead, SalesRead
 from afisha.infrastracture.postgres.models import Booking, BookingStatus, EventSeat

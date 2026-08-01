@@ -1,7 +1,11 @@
 from contextlib import asynccontextmanager
 
-from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine, create_async_engine, \
-    async_sessionmaker
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from afisha.core.config import PostgresConfig
 from afisha.infrastracture.postgres.repositories.bookings import BookingRepo

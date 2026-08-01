@@ -1,7 +1,7 @@
 import logging
 from contextlib import asynccontextmanager
 
-from dishka import Scope, AsyncContainer
+from dishka import AsyncContainer, Scope
 from fastapi import FastAPI
 
 from afisha.infrastracture.postgres.add_event_data import add_event_data_to_db

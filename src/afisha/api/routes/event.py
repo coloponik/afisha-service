@@ -3,7 +3,12 @@ from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter
 
 from afisha.api.dependencies import CurrentUserId
-from afisha.application.dto import EventRead, EventSeatRead, BookingCreate, CheckoutResponse
+from afisha.application.dto import (
+    BookingCreate,
+    CheckoutResponse,
+    EventRead,
+    EventSeatRead,
+)
 from afisha.services.booking import BookingService
 
 router = APIRouter(prefix="/events", route_class=DishkaRoute, tags=["Мероприятие"])

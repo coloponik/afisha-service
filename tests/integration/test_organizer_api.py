@@ -1,3 +1,4 @@
+import httpx
 import pytest
 
 
@@ -8,7 +9,12 @@ class TestGetEventDashboard:
             (1, {"x-user-id": "1"})
         ]
     )
-    async def test_returns_event_dashboard(self, async_client, test_event_id, test_headers):
+    async def test_returns_event_dashboard(
+            self,
+            async_client: httpx.AsyncClient,
+            test_event_id: int,
+            test_headers: dict
+    ) -> None:
 
         first_response = await async_client.post(
                 f"/events/{test_event_id}/checkout",
@@ -41,7 +47,12 @@ class TestGetEventDashboard:
             (1, {"x-user-id": "999"})
         ]
     )
-    async def test_forbidden_for_other_users(self, async_client, test_event_id, test_headers):
+    async def test_forbidden_for_other_users(
+            self,
+            async_client: httpx.AsyncClient,
+            test_event_id: int,
+            test_headers: dict
+    ) -> None:
         response = await async_client.get(
             f"/organizer/events/{test_event_id}/dashboard",
             headers=test_headers,
