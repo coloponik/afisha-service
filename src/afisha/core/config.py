@@ -1,3 +1,5 @@
+import os
+
 from pydantic import BaseModel, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -63,7 +65,7 @@ class Settings(BaseSettings):
     booking: BookingConfig
 
     model_config = SettingsConfigDict(
-        env_file=".env.dev",
+        env_file=os.getenv("ENV_FILE", ".env.dev"),
         env_file_encoding="utf-8",
         env_nested_delimiter="__",
         extra="ignore",

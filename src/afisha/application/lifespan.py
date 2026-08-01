@@ -9,6 +9,7 @@ from afisha.infrastracture.postgres.manager import PostgresClient
 
 logger = logging.getLogger(__name__)
 
+
 def create_lifespan(container: AsyncContainer):
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -21,6 +22,7 @@ def create_lifespan(container: AsyncContainer):
             logger.info("Afisha shutdown started")
 
     return lifespan
+
 
 async def seed_database(container: AsyncContainer):
     async with container(scope=Scope.REQUEST) as req_container:

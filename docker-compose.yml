@@ -15,6 +15,7 @@ services:
       start_period: 10s
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   payment-api:
     build: ./mock_apis/payment

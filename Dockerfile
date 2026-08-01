@@ -9,4 +9,6 @@ RUN uv sync --no-dev
 
 COPY . .
 
+ENV ENV_FILE=.env.dev
+
 CMD ["uv", "run", "uvicorn", "afisha.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

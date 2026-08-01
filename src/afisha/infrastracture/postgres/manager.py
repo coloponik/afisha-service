@@ -26,6 +26,10 @@ class PostgresClient:
             autoflush=False
         )
 
+    @property
+    def engine(self) -> AsyncEngine:
+        return self._engine
+
     @asynccontextmanager
     async def session(self):
         async with self._session_maker() as session:
@@ -36,6 +40,7 @@ class PostgresClient:
             except Exception:
                 await db.rollback()
                 raise
+
     @property
     def session_maker(self):
         return self._session_maker
