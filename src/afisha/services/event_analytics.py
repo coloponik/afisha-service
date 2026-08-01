@@ -29,7 +29,7 @@ class EventAnalyticsService:
 
         try:
             async with asyncio.TaskGroup() as tg:
-                task_sales = tg.create_task(self.db.bookings.get_sales(event_id, organizer_id))
+                task_sales = tg.create_task(self.db.bookings.get_sales(event_id))
                 task_occupancy = tg.create_task(self.db.event_seats.get_occupancy(event_id))
         except* Exception:
             logger.exception("Failed to get analytics from DB")

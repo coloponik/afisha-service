@@ -18,7 +18,7 @@ from afisha.services.event_analytics import EventAnalyticsService
 
 
 class ConfigProvider(Provider):
-    def __init__(self, settings: Settings):
+    def __init__(self, settings: Settings) -> None:
         super().__init__()
         self._settings = settings
 

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import Float, Numeric, and_, cast, func, or_, select, update
 
 from afisha.application.dto import OccupancyRead
@@ -31,7 +33,7 @@ class EventSeatRepo(BaseRepo):
     async def reserve_seats(
             self,
             event_seats: list[EventSeat],
-            reserved_until,
+            reserved_until: datetime,
             booking_id: int
     ) -> None:
         for seat in event_seats:
@@ -52,7 +54,7 @@ class EventSeatRepo(BaseRepo):
 
         await self.session.execute(stmt)
 
-    async def get_occupancy(self, event_id: int):
+    async def get_occupancy(self, event_id: int) -> OccupancyRead:
         query = (
             select(
                 func.count(EventSeat.id)

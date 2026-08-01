@@ -7,8 +7,10 @@ from afisha.application.dto import (
     BookingRead,
     CheckoutBooking,
     CheckoutResponse,
+    EventRead,
     PaymentQuote,
     ProtectionQuote,
+    SeatRead,
 )
 from afisha.exceptions import (
     PaymentUnavailableError,
@@ -107,7 +109,6 @@ class BookingService:
         seats = await self.db.seats.get_seats(payload.seat_ids)
 
         booking = self._build_checkout_booking(booking, event, seats)
-        protection = self._build_checkout_protection(protection)
 
         return CheckoutResponse(
             booking=booking,
@@ -165,7 +166,7 @@ class BookingService:
             await db.event_seats.release_seats(booking_id)
             await db.bookings.cancel(booking_id)
 
-    async def _compensate_booking(self, booking: BookingRead):
+    async def _compensate_booking(self, booking: BookingRead) -> None:
         """Выполняет компенсирующие действия при ошибке оформления брони."""
         try:
             await self.release_booking(booking.id)
@@ -198,8 +199,8 @@ class BookingService:
     def _build_checkout_booking(
             self,
             booking: BookingRead,
-            event,
-            seats
+            event: EventRead,
+            seats: [SeatRead]
     ) -> CheckoutBooking:
         return CheckoutBooking(
             id=booking.id,
@@ -212,19 +213,6 @@ class BookingService:
             with_protection=booking.with_protection,
             reserved_until=booking.reserved_until
         )
-
-    def _build_checkout_protection(
-            self,
-            protection
-    ) -> ProtectionQuote | None:
-        if protection is not None:
-            return ProtectionQuote(
-                available=protection.available,
-                price=protection.price,
-                covered_amount=protection.covered_amount,
-                description=protection.description
-            )
-        return None
 
     def _validate_payment_response(
             self,
@@ -257,10 +245,10 @@ class BookingService:
 
         return (
             ProtectionQuote(
-            available=protection.available,
-            price=protection.price,
-            covered_amount=protection.covered_amount,
-            description=protection.description
+                available=protection.available,
+                price=protection.price,
+                covered_amount=protection.covered_amount,
+                description=protection.description
             )
             if protection is not None else protection
         )

@@ -112,7 +112,7 @@ class EventSeat(Base):
         index=True,
     )
 
-    def is_reserved(self, now: datetime):
+    def is_reserved(self, now: datetime) -> bool:
         return (
             self.status == SeatStatus.reserved
             and self.reserved_until is not None

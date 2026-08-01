@@ -1,3 +1,4 @@
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from sqlalchemy.ext.asyncio import (
@@ -15,7 +16,7 @@ from afisha.infrastracture.postgres.repositories.seats import SeatRepo
 
 
 class PostgresClient:
-    def __init__(self, config: PostgresConfig):
+    def __init__(self, config: PostgresConfig) -> None:
         self._engine: AsyncEngine = create_async_engine(
             config.url,
             echo=config.echo,
@@ -35,7 +36,7 @@ class PostgresClient:
         return self._engine
 
     @asynccontextmanager
-    async def session(self):
+    async def session(self) -> AsyncIterator:
         async with self._session_maker() as session:
             db = DatabaseManager(session, self._session_maker)
             try:
@@ -46,10 +47,10 @@ class PostgresClient:
                 raise
 
     @property
-    def session_maker(self):
+    def session_maker(self) -> async_sessionmaker:
         return self._session_maker
 
-    async def close(self):
+    async def close(self) -> None:
         await self._engine.dispose()
 
 
@@ -59,7 +60,7 @@ class DatabaseManager:
         self.session_maker = session_maker
 
     @asynccontextmanager
-    async def transaction(self):
+    async def transaction(self) -> AsyncIterator:
         async with self.session_maker() as new_session:
             db = DatabaseManager(new_session, self.session_maker)
             try:

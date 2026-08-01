@@ -21,14 +21,14 @@ class BaseHTTPConnector:
             self._rate_limit_interval = rate_limit_interval
         self.retry_count = retry_count
 
-    async def close_clint(self):
+    async def close_clint(self) -> None:
         await self._client.aclose()
 
-    async def release_rate_limiter_later(self):
+    async def release_rate_limiter_later(self) -> None:
         await asyncio.sleep(self._rate_limit_interval + 0.05)
         self._rate_limiter.release()
 
-    async def _exponential_backoff_sleep(self, attempt: int):
+    async def _exponential_backoff_sleep(self, attempt: int) -> None:
         delay = 0.2 * 2 ** (attempt + 1)
         jitter = random.uniform(0.05, 0.2)
 

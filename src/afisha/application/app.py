@@ -1,3 +1,4 @@
+from dishka import AsyncContainer
 from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,7 +9,7 @@ from afisha.application.lifespan import create_lifespan
 from afisha.core.config import Settings
 
 
-def create_fastapi_app(settings: Settings, container) -> FastAPI:
+def create_fastapi_app(settings: Settings, container: AsyncContainer) -> FastAPI:
     app = FastAPI(
         title="API Афиши",
         lifespan=create_lifespan(container),

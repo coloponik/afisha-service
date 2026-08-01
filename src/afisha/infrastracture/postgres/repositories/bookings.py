@@ -79,7 +79,7 @@ class BookingRepo(BaseRepo):
 
         await self.session.execute(stmt)
 
-    async def get_sales(self, event_id: int, organizer_id: int) -> SalesRead:
+    async def get_sales(self, event_id: int) -> SalesRead:
         sold_tickets = (
             select(func.count(EventSeat.id))
             .select_from(EventSeat)
