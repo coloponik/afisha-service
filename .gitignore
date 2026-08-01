@@ -13,7 +13,6 @@ wheels/
 # Конфиги среды
 .env*
 !.env.dev.example
-!.env.test
 
 # Базы данных
 .DS_Store
