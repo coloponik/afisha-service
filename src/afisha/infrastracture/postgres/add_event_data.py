@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 # from afisha.infrastracture.postgres.db import engine
-from afisha.infrastracture.postgres.models import Event, EventSeat, Location, Seat
+from afisha.infrastracture.postgres.models import Event, EventSeat, Location, Seat, BookingStatus, \
+    Booking, SeatStatus
 
 
 async def add_event_data_to_db(session_maker: async_sessionmaker) -> None:
@@ -54,6 +55,31 @@ async def add_event_data_to_db(session_maker: async_sessionmaker) -> None:
                 EventSeat(event_id=event.id, seat_id=seat.id, price=event.base_price)
                 for seat in seats
             )
+
+            booking = Booking(
+                event_id=event.id,
+                user_id=1,
+                amount=1000,
+                payment_commission=100,
+                protection_price=None,
+                with_protection=False,
+                status=BookingStatus.paid,
+                reserved_until=datetime.now(timezone.utc)
+            )
+            db.add(booking)
+            await db.flush()
+
+            event_seat = await db.scalar(
+                select(EventSeat)
+                .where(
+                    EventSeat.event_id == event.id,
+                    EventSeat.seat_id == seats[0].id,
+                )
+            )
+
+            event_seat.status = SeatStatus.sold
+            event_seat.booking_id = booking.id
+            event_seat.reserved_until = None
 
         print("Тестовые данные созданы")
 
