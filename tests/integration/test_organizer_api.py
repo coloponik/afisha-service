@@ -13,7 +13,7 @@ class TestGetEventDashboard:
         first_response = await async_client.post(
                 f"/events/{test_event_id}/checkout",
                 headers=test_headers,
-                json={"seat_ids": [1]},
+                json={"seat_ids": [2, 3]},
         )
 
         assert first_response.status_code == 200
@@ -29,8 +29,11 @@ class TestGetEventDashboard:
 
         assert "event_title" in body
         assert "starts_at" in body
-        assert body["sales"]["paid_orders"] == 0
-        assert body["occupancy"]["reserved"] == 1
+        assert body["sales"]["paid_orders"] == 1
+        assert body["sales"]["sold_tickets"] == 1
+        assert body["sales"]["average_order"] == 1000
+        assert body["occupancy"]["reserved"] == 2
+        assert body["occupancy"]["occupancy_percent"] == 6
 
     @pytest.mark.parametrize(
         "test_event_id, test_headers",

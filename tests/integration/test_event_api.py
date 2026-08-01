@@ -10,7 +10,7 @@ class TestPrepareCheckout:
     @pytest.mark.parametrize(
         "test_event_id, test_headers, test_json",
         [
-            (1, {'x-user-id': "1"}, {"seat_ids": [1]})
+            (1, {'x-user-id': "1"}, {"seat_ids": [2]})
         ]
     )
     async def test_returns_booking_data(
@@ -35,7 +35,7 @@ class TestPrepareCheckout:
     @pytest.mark.parametrize(
         "test_event_id, test_headers, test_json",
         [
-            (1, {'x-user-id': "1"}, {"seat_ids": [1]})
+            (1, {'x-user-id': "1"}, {"seat_ids": [2]})
         ]
     )
     async def test_rejects_already_reserved_seats(
@@ -64,7 +64,7 @@ class TestPrepareCheckout:
     @pytest.mark.parametrize(
         "test_event_id, test_headers, test_json",
         [
-            (1, {'x-user-id': "1"}, {"seat_ids": [1]})
+            (1, {'x-user-id': "1"}, {"seat_ids": [2]})
         ]
     )
     async def test_prepare_checkout_creates_booking_and_reserves_seats(
@@ -88,6 +88,7 @@ class TestPrepareCheckout:
 
             booking = await db.session.scalar(
                 select(Booking)
+                .where(Booking.id == 2)
             )
 
             assert booking is not None
@@ -95,7 +96,7 @@ class TestPrepareCheckout:
 
             event_seat = await db.session.scalar(
                 select(EventSeat)
-                .where(EventSeat.seat_id == 1)
+                .where(EventSeat.seat_id == 2)
             )
 
             assert event_seat.status == SeatStatus.reserved
