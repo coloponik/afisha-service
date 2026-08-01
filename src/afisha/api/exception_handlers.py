@@ -1,15 +1,15 @@
-from fastapi import status, FastAPI, Request
+from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
 from afisha.exceptions import (
+    DashboardUnavailableError,
     DomainError,
-    SeatAlreadyReservedError,
-    SeatsNotFoundError,
-    PaymentUnavailableError,
     EventNotFoundError,
-    SeatAlreadySoldError,
     ForbiddenError,
-    DashboardUnavailableError
+    PaymentUnavailableError,
+    SeatAlreadyReservedError,
+    SeatAlreadySoldError,
+    SeatsNotFoundError,
 )
 
 DOMAIN_ERROR_RESPONSES: dict[type[DomainError], tuple[int, str]] = {
@@ -33,14 +33,14 @@ DOMAIN_ERROR_RESPONSES: dict[type[DomainError], tuple[int, str]] = {
         status.HTTP_404_NOT_FOUND,
         "Event not found"
     ),
-    ForbiddenError: {
+    ForbiddenError: (
         status.HTTP_403_FORBIDDEN,
         "User is not the event organizer"
-    },
-    DashboardUnavailableError: {
+    ),
+    DashboardUnavailableError: (
         status.HTTP_503_SERVICE_UNAVAILABLE,
         "Analytics is temporarily unavailable"
-    }
+    )
 }
 
 
