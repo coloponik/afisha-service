@@ -29,8 +29,8 @@ class EventAnalyticsService:
 
         try:
             async with asyncio.TaskGroup() as tg:
-                task_sales = tg.create_task(self.db.bookings.get_sales(event_id))
-                task_occupancy = tg.create_task(self.db.event_seats.get_occupancy(event_id))
+                task_sales = tg.create_task(self._get_sales_analytics(event_id))
+                task_occupancy = tg.create_task(self._get_occupancy_analytics(event_id))
         except* Exception:
             logger.exception("Failed to get analytics from DB")
             raise DashboardUnavailableError()
@@ -47,6 +47,19 @@ class EventAnalyticsService:
             sales=sales,
             occupancy=occupancy
         )
+
+    async def _get_sales_analytics(self, event_id: int) -> SalesRead:
+        async with self.db.transaction() as db:
+            sales = await db.bookings.get_sales(event_id)
+
+        return sales
+
+    async def _get_occupancy_analytics(self, event_id: int) -> OccupancyRead:
+        async with self.db.transaction() as db:
+            occupancy = await db.event_seats.get_occupancy(event_id)
+
+        return occupancy
+
 
     def _build_sales_dashboard(self, sales: SalesRead) -> SalesDashboard:
         return SalesDashboard(
