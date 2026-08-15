@@ -8,7 +8,7 @@ from afisha.core.config import (
     ConnectorsConfig,
     PostgresConfig,
     ProjectConfig,
-    Settings,
+    Settings, RedisConfig,
 )
 from afisha.infrastracture.api_connectors.internal.payment import PaymentConnector
 from afisha.infrastracture.api_connectors.internal.protection import ProtectionConnector
@@ -37,6 +37,10 @@ class ConfigProvider(Provider):
     @provide(scope=Scope.APP)
     def get_postgres_config(self) -> PostgresConfig:
         return self._settings.postgres
+
+    @provide(scope=Scope.APP)
+    def get_redis_config(self) -> RedisConfig:
+        return self._settings.redis
 
     @provide(scope=Scope.APP)
     def get_connectors_config(self) -> ConnectorsConfig:

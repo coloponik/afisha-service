@@ -2,10 +2,11 @@ from collections.abc import AsyncIterator
 
 from dishka import Provider, Scope, provide
 
-from afisha.core.config import ConnectorsConfig, PostgresConfig
+from afisha.core.config import ConnectorsConfig, PostgresConfig, RedisConfig
 from afisha.infrastracture.api_connectors.internal.payment import PaymentConnector
 from afisha.infrastracture.api_connectors.internal.protection import ProtectionConnector
 from afisha.infrastracture.postgres.manager import DatabaseManager, PostgresClient
+from afisha.infrastracture.redis.manager import RedisClient, create_redis_client
 
 
 class PostgresProvider(Provider):
@@ -21,6 +22,16 @@ class PostgresProvider(Provider):
     async def get_db(self, postgres: PostgresClient) -> AsyncIterator[DatabaseManager]:
         async with postgres.session() as db:
             yield db
+
+
+class RedisProvider(Provider):
+    @provide(scope=Scope.APP)
+    async def get_redis(self, config: RedisConfig) -> AsyncIterator[RedisClient]:
+        redis = create_redis_client(config)
+
+        yield redis
+
+        await redis.close()
 
 
 class ConnectorsProvider(Provider):

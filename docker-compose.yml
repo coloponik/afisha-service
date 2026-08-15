@@ -27,6 +27,16 @@ services:
     ports:
       - "9002:9002"
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "7379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
 #  app:
 #    build: .
 #    ports:
@@ -41,6 +51,8 @@ services:
 #        condition: service_started
 #      protection-api:
 #        condition: service_started
+#     redis:
+#       condition: service_healthy
 
 volumes:
   postgres_data:

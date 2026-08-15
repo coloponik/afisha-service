@@ -48,6 +48,21 @@ class ProtectionApiConfig(BaseModel):
     rate_limit_interval: int | None = None
 
 
+class RedisConfig(BaseModel):
+    host: str
+    port: int
+    password: SecretStr | None = None
+    database: int = 0
+
+    @property
+    def url(self) -> str:
+        if self.password is None:
+            return f"redis://{self.host}:{self.port}/{self.database}"
+
+        password = self.password.get_secret_value()
+        return f"redis://:{password}@{self.host}:{self.port}/{self.database}"
+
+
 class ConnectorsConfig(BaseModel):
     payment: PaymentApiConfig
     protection: ProtectionApiConfig
@@ -61,6 +76,7 @@ class Settings(BaseSettings):
     app: AppConfig
     project: ProjectConfig
     postgres: PostgresConfig
+    redis: RedisConfig
     connectors: ConnectorsConfig
     booking: BookingConfig
 

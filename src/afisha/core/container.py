@@ -2,7 +2,7 @@ from dishka import AsyncContainer, make_async_container
 
 from afisha.application.providers import ConfigProvider, ServiceProvider
 from afisha.core.config import Settings
-from afisha.infrastracture.providers import ConnectorsProvider, PostgresProvider
+from afisha.infrastracture.providers import ConnectorsProvider, PostgresProvider, RedisProvider
 
 
 def create_container(settings: Settings) -> AsyncContainer:
@@ -10,5 +10,6 @@ def create_container(settings: Settings) -> AsyncContainer:
         ConfigProvider(settings),
         ServiceProvider(),
         PostgresProvider(),
+        RedisProvider(),
         ConnectorsProvider()
     )
