@@ -37,6 +37,11 @@ services:
       timeout: 3s
       retries: 10
 
+  redisinsight:
+    image: redis/redisinsight:latest
+    ports:
+      - "5540:5540"
+
 #  app:
 #    build: .
 #    ports:
