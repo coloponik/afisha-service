@@ -13,7 +13,9 @@ from afisha.core.config import (
 from afisha.infrastracture.api_connectors.internal.payment import PaymentConnector
 from afisha.infrastracture.api_connectors.internal.protection import ProtectionConnector
 from afisha.infrastracture.postgres.manager import DatabaseManager
+from afisha.infrastracture.redis.cache_repo import CacheRepo
 from afisha.services.booking import BookingService
+from afisha.services.event import EventService
 from afisha.services.event_analytics import EventAnalyticsService
 
 
@@ -52,6 +54,17 @@ class ConfigProvider(Provider):
 
 
 class ServiceProvider(Provider):
+    @provide(scope=Scope.REQUEST)
+    def get_event_service(
+            self,
+            db: DatabaseManager,
+            cache: CacheRepo
+    ) -> EventService:
+        return EventService(
+            db=db,
+            cache=cache
+        )
+
     @provide(scope=Scope.REQUEST)
     def get_event_analytics_service(
             self,

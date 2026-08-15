@@ -3,7 +3,7 @@ from redis.asyncio import Redis
 from afisha.core.config import RedisConfig
 
 
-class RedisClient:
+class RedisManager:
     def __init__(self, redis: Redis) -> None:
         self.client = redis
 
@@ -11,10 +11,10 @@ class RedisClient:
         await self.client.close()
 
 
-def create_redis_client(config: RedisConfig) -> RedisClient:
+def create_redis_manager(config: RedisConfig) -> RedisManager:
     redis = Redis.from_url(
         config.url,
         decode_responses=True
     )
 
-    return RedisClient(redis)
+    return RedisManager(redis)
