@@ -9,10 +9,22 @@ from afisha.exceptions import (
     PaymentUnavailableError,
     SeatAlreadyReservedError,
     SeatAlreadySoldError,
-    SeatsNotFoundError,
+    SeatsNotFoundError, LockTimeoutError,
 )
 
 DOMAIN_ERROR_RESPONSES: dict[type[DomainError], tuple[int, str]] = {
+    DashboardUnavailableError: (
+        status.HTTP_503_SERVICE_UNAVAILABLE,
+        "Analytics is temporarily unavailable"
+    ),
+    EventNotFoundError: (
+        status.HTTP_404_NOT_FOUND,
+        "Event not found"
+    ),
+    ForbiddenError: (
+        status.HTTP_403_FORBIDDEN,
+        "User is not the event organizer"
+    ),
     SeatAlreadyReservedError: (
         status.HTTP_409_CONFLICT,
         "Seat is already reserved"
@@ -25,21 +37,13 @@ DOMAIN_ERROR_RESPONSES: dict[type[DomainError], tuple[int, str]] = {
         status.HTTP_404_NOT_FOUND,
         "Seat not found"
     ),
+    LockTimeoutError: (
+        status.HTTP_503_SERVICE_UNAVAILABLE,
+        "Event service temporarily unavailable"
+    ),
     PaymentUnavailableError: (
         status.HTTP_503_SERVICE_UNAVAILABLE,
-        "Payment service is unavailable now"
-    ),
-    EventNotFoundError: (
-        status.HTTP_404_NOT_FOUND,
-        "Event not found"
-    ),
-    ForbiddenError: (
-        status.HTTP_403_FORBIDDEN,
-        "User is not the event organizer"
-    ),
-    DashboardUnavailableError: (
-        status.HTTP_503_SERVICE_UNAVAILABLE,
-        "Analytics is temporarily unavailable"
+        "Payment service is temporarily unavailable"
     )
 }
 

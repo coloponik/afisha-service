@@ -37,3 +37,11 @@ class ForbiddenError(EventAnalyticsError):
 
 class DashboardUnavailableError(EventAnalyticsError):
     pass
+
+
+class EventError(DomainError):
+    pass
+
+
+class LockTimeoutError(EventError):
+    pass
