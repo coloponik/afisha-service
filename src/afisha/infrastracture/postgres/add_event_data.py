@@ -91,7 +91,7 @@ async def add_event_data_to_db(session_maker: async_sessionmaker) -> None:
         print("Тестовые данные созданы")
 
 
-# if __name__ == "__main__":
-#     import asyncio
-#
-#     asyncio.run(add_event_data_to_db())
+if __name__ == "__main__":
+    import asyncio
+
+    asyncio.run(add_event_data_to_db())

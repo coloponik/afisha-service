@@ -10,8 +10,15 @@ from sqlalchemy import text
 from afisha.application.app import create_fastapi_app
 from afisha.application.providers import ConfigProvider, ServiceProvider
 from afisha.core.config import Settings
-from afisha.infrastracture.postgres.manager import PostgresClient
-from afisha.infrastracture.providers import PostgresProvider
+from afisha.infrastracture.postgres.manager import PostgresClient, DatabaseManager
+from afisha.infrastracture.postgres.queue import PostgresEventQueue
+from afisha.infrastracture.providers import (
+    PostgresProvider,
+    RedisProvider,
+    CacheProvider,
+    PostgresEventQueueProvider
+)
+from afisha.services.event import EventService
 from tests.mock_providers import MockConnectorsProvider
 
 
@@ -25,6 +32,9 @@ def make_test_container(settings: Settings) -> AsyncContainer:
         ConfigProvider(settings),
         ServiceProvider(),
         PostgresProvider(),
+        RedisProvider(),
+        CacheProvider(),
+        PostgresEventQueueProvider(),
         MockConnectorsProvider()
     )
 
@@ -59,6 +69,14 @@ async def async_client(
             yield client
 
 
+@pytest.fixture
+async def db(
+    test_container: AsyncContainer,
+) -> AsyncGenerator[DatabaseManager, None]:
+    async with test_container() as request_container:
+        yield await request_container.get(DatabaseManager)
+
+
 @pytest.fixture(autouse=True)
 async def clean_database(
         test_container: AsyncContainer
@@ -80,3 +98,24 @@ async def clean_database(
                     RESTART IDENTITY CASCADE
                 """)
             )
+
+
+@pytest.fixture
+async def event_service(test_container: AsyncContainer) -> AsyncGenerator[EventService, None]:
+    async with test_container() as request_container:
+        yield await request_container.get(EventService)
+
+
+@pytest.fixture
+async def postgres_event_queue(
+    test_container: AsyncContainer,
+) -> AsyncGenerator[PostgresEventQueue, None]:
+    async with test_container() as request_container:
+        queue = await request_container.get(PostgresEventQueue)
+        yield queue
+
+
+@pytest.fixture
+async def running_test_app(test_app: FastAPI) -> FastAPI:
+    async with LifespanManager(test_app):
+        yield test_app

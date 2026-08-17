@@ -32,6 +32,14 @@ class EventRepo(BaseRepo):
             base_price=event.base_price
         )
 
+    async def get_event_view(self, event_id: int) -> EventView | None:
+        query = (
+            select(EventView)
+            .where(EventView.event_id == event_id)
+        )
+
+        return await self.session.scalar(query)
+
     async def update_or_create_event_view(self, events: list[int]) -> None:
         counts = Counter(events)
 

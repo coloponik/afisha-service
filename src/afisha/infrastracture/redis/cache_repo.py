@@ -25,6 +25,9 @@ class CacheRepo:
         ttl_with_jitter = ttl + random.randint(-jitter, jitter)
         return ttl_with_jitter
 
+    async def delete(self, key: str) -> None:
+        await self._client.delete(key)
+
     async def get_event(self, event_id: int) -> EventRead | None:
         res = await self._client.get(self._get_event_key(event_id))
 

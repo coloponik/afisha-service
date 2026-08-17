@@ -8,7 +8,7 @@ class RedisManager:
         self.client = redis
 
     async def close(self) -> None:
-        await self.client.close()
+        await self.client.aclose()
 
 
 def create_redis_manager(config: RedisConfig) -> RedisManager:
