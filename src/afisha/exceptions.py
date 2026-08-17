@@ -3,7 +3,19 @@ class DomainError(Exception):
     pass
 
 
+class InfrastructureError(Exception):
+    pass
+
+
 class BookingError(DomainError):
+    pass
+
+
+class EventError(DomainError):
+    pass
+
+
+class EventAnalyticsError(DomainError):
     pass
 
 
@@ -23,7 +35,11 @@ class SeatsNotFoundError(BookingError):
     pass
 
 
-class EventAnalyticsError(DomainError):
+class LockTimeoutError(EventError):
+    pass
+
+
+class DashboardUnavailableError(EventAnalyticsError):
     pass
 
 
@@ -35,13 +51,9 @@ class ForbiddenError(EventAnalyticsError):
     pass
 
 
-class DashboardUnavailableError(EventAnalyticsError):
+class PostgresEventQueueError(InfrastructureError):
     pass
 
 
-class EventError(DomainError):
-    pass
-
-
-class LockTimeoutError(EventError):
+class EventViewPersistenceError(PostgresEventQueueError):
     pass

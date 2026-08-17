@@ -9,7 +9,8 @@ from afisha.exceptions import (
     PaymentUnavailableError,
     SeatAlreadyReservedError,
     SeatAlreadySoldError,
-    SeatsNotFoundError, LockTimeoutError,
+    SeatsNotFoundError,
+    LockTimeoutError
 )
 
 DOMAIN_ERROR_RESPONSES: dict[type[DomainError], tuple[int, str]] = {
