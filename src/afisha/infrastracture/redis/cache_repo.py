@@ -17,6 +17,9 @@ class CacheRepo:
     def _get_event_key(self, event_id: int) -> str:
         return f"event:{event_id}"
 
+    def _get_event_view_key(self, event_id: int, ip: str) -> str:
+        return f"event:view:{event_id}:{ip}"
+
     def _get_ttl_with_jitter(self, ttl: int) -> int:
         jitter = int(ttl * 0.1)
         ttl_with_jitter = ttl + random.randint(-jitter, jitter)
@@ -29,6 +32,15 @@ class CacheRepo:
             return None
 
         return EventRead.model_validate(json.loads(res))
+
+    async def register_event_view(self, event_id: int, ip: str, ttl: int = 300) -> bool:
+        res = await self._client.set(
+            self._get_event_view_key(event_id, ip),
+            "1",
+            ex=ttl,
+            nx=True
+        )
+        return res is True
 
     async def set_event(self, event_id: int, event: EventRead, ttl: int = 30) -> None:
         await self._client.set(

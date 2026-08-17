@@ -6,6 +6,7 @@ from afisha.core.config import ConnectorsConfig, PostgresConfig, RedisConfig
 from afisha.infrastracture.api_connectors.internal.payment import PaymentConnector
 from afisha.infrastracture.api_connectors.internal.protection import ProtectionConnector
 from afisha.infrastracture.postgres.manager import DatabaseManager, PostgresClient
+from afisha.infrastracture.postgres.queue import PostgresEventQueue
 from afisha.infrastracture.redis.cache_repo import CacheRepo
 from afisha.infrastracture.redis.manager import RedisManager, create_redis_manager
 
@@ -23,6 +24,12 @@ class PostgresProvider(Provider):
     async def get_db(self, postgres: PostgresClient) -> AsyncIterator[DatabaseManager]:
         async with postgres.session() as db:
             yield db
+
+
+class PostgresEventQueueProvider(Provider):
+    @provide(scope=Scope.APP)
+    async def get_postgres_event_queue(self, postgres: PostgresClient) -> PostgresEventQueue:
+        return PostgresEventQueue(postgres=postgres)
 
 
 class RedisProvider(Provider):

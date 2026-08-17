@@ -13,6 +13,7 @@ from afisha.core.config import (
 from afisha.infrastracture.api_connectors.internal.payment import PaymentConnector
 from afisha.infrastracture.api_connectors.internal.protection import ProtectionConnector
 from afisha.infrastracture.postgres.manager import DatabaseManager
+from afisha.infrastracture.postgres.queue import PostgresEventQueue
 from afisha.infrastracture.redis.cache_repo import CacheRepo
 from afisha.services.booking import BookingService
 from afisha.services.event import EventService
@@ -58,11 +59,13 @@ class ServiceProvider(Provider):
     def get_event_service(
             self,
             db: DatabaseManager,
-            cache: CacheRepo
+            cache: CacheRepo,
+            queue: PostgresEventQueue
     ) -> EventService:
         return EventService(
             db=db,
-            cache=cache
+            cache=cache,
+            queue=queue
         )
 
     @provide(scope=Scope.REQUEST)
