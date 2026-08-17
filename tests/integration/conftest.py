@@ -19,7 +19,7 @@ from afisha.infrastracture.providers import (
     PostgresEventQueueProvider
 )
 from afisha.services.event import EventService
-from tests.mock_providers import MockConnectorsProvider
+from tests.integration.mock_providers import MockConnectorsProvider
 
 
 @pytest.fixture(scope="session")
