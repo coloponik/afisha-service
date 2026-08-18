@@ -1,29 +1,34 @@
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 
 from afisha.api.dependencies import CurrentUserId
 from afisha.application.dto import (
     BookingCreate,
     CheckoutResponse,
-    EventRead,
+    EventData,
     EventSeatRead,
 )
 from afisha.services.booking import BookingService
+from afisha.services.event import EventService
 
 router = APIRouter(prefix="/events", route_class=DishkaRoute, tags=["Мероприятие"])
 
 
 @router.get("/")
-async def list_events() -> list[EventRead]:
+async def list_events() -> list[EventData]:
     """Возвращает список мероприятий для клиента."""
     ...
 
 
 @router.get("/{event_id}")
-async def get_event(event_id: int) -> EventRead:
+async def get_event(
+        event_id: int,
+        request: Request,
+        service: FromDishka[EventService]
+) -> EventData:
     """Возвращает описание мероприятия."""
-    ...
+    return await service.get_event(event_id=event_id, request=request)
 
 
 @router.get("/{event_id}/seats")

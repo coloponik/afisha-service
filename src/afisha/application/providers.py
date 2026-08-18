@@ -8,12 +8,15 @@ from afisha.core.config import (
     ConnectorsConfig,
     PostgresConfig,
     ProjectConfig,
-    Settings,
+    Settings, RedisConfig,
 )
 from afisha.infrastracture.api_connectors.internal.payment import PaymentConnector
 from afisha.infrastracture.api_connectors.internal.protection import ProtectionConnector
 from afisha.infrastracture.postgres.manager import DatabaseManager
+from afisha.infrastracture.postgres.queue import PostgresEventQueue
+from afisha.infrastracture.redis.cache_repo import CacheRepo
 from afisha.services.booking import BookingService
+from afisha.services.event import EventService
 from afisha.services.event_analytics import EventAnalyticsService
 
 
@@ -39,6 +42,10 @@ class ConfigProvider(Provider):
         return self._settings.postgres
 
     @provide(scope=Scope.APP)
+    def get_redis_config(self) -> RedisConfig:
+        return self._settings.redis
+
+    @provide(scope=Scope.APP)
     def get_connectors_config(self) -> ConnectorsConfig:
         return self._settings.connectors
 
@@ -48,6 +55,19 @@ class ConfigProvider(Provider):
 
 
 class ServiceProvider(Provider):
+    @provide(scope=Scope.REQUEST)
+    def get_event_service(
+            self,
+            db: DatabaseManager,
+            cache: CacheRepo,
+            queue: PostgresEventQueue
+    ) -> EventService:
+        return EventService(
+            db=db,
+            cache=cache,
+            queue=queue
+        )
+
     @provide(scope=Scope.REQUEST)
     def get_event_analytics_service(
             self,
