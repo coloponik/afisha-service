@@ -3,7 +3,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models import BookingStatus, SeatStatus
+from afisha.infrastracture.postgres.models import BookingStatus, SeatStatus
 
 
 class LocationRead(BaseModel):
@@ -69,6 +69,18 @@ class BookingCreate(BaseModel):
     seat_ids: list[int] = Field(min_length=1)
 
 
+class BookingRead(BaseModel):
+    id: int
+    event_id: int
+    user_id: int
+    amount: int
+    payment_commission: int | None
+    protection_price: int | None
+    with_protection: bool
+    status: BookingStatus
+    reserved_until: datetime
+
+
 class SalesDashboard(BaseModel):
     paid_orders: int
     sold_tickets: int
@@ -76,7 +88,22 @@ class SalesDashboard(BaseModel):
     average_order: int
 
 
+class SalesRead(BaseModel):
+    paid_orders: int
+    sold_tickets: int
+    revenue: int
+    average_order: int
+
+
 class OccupancyDashboard(BaseModel):
+    total: int
+    available: int
+    reserved: int
+    sold: int
+    occupancy_percent: float
+
+
+class OccupancyRead(BaseModel):
     total: int
     available: int
     reserved: int

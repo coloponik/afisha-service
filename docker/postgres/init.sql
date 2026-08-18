@@ -1,0 +1,1 @@
+CREATE DATABASE afisha_test;

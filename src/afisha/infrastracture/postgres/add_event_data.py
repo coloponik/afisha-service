@@ -1,14 +1,22 @@
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from app.db import engine
-from app.models import Event, EventSeat, Location, Seat
+# from afisha.infrastracture.postgres.db import engine
+from afisha.infrastracture.postgres.models import (
+    Booking,
+    BookingStatus,
+    Event,
+    EventSeat,
+    Location,
+    Seat,
+    SeatStatus,
+)
 
 
-async def add_event_data_to_db() -> None:
-    async with AsyncSession(engine, expire_on_commit=False) as db:
+async def add_event_data_to_db(session_maker: async_sessionmaker) -> None:
+    async with session_maker() as db:
         async with db.begin():
             if await db.scalar(select(func.count(Location.id))):
                 print("Тестовые данные уже существуют")
@@ -55,10 +63,35 @@ async def add_event_data_to_db() -> None:
                 for seat in seats
             )
 
-    print("Тестовые данные созданы")
+            booking = Booking(
+                event_id=event.id,
+                user_id=1,
+                amount=1000,
+                payment_commission=100,
+                protection_price=None,
+                with_protection=False,
+                status=BookingStatus.paid,
+                reserved_until=datetime.now(timezone.utc)
+            )
+            db.add(booking)
+            await db.flush()
+
+            event_seat = await db.scalar(
+                select(EventSeat)
+                .where(
+                    EventSeat.event_id == event.id,
+                    EventSeat.seat_id == seats[0].id,
+                )
+            )
+
+            event_seat.status = SeatStatus.sold
+            event_seat.booking_id = booking.id
+            event_seat.reserved_until = None
+
+        print("Тестовые данные созданы")
 
 
-if __name__ == "__main__":
-    import asyncio
-
-    asyncio.run(add_event_data_to_db())
+# if __name__ == "__main__":
+#     import asyncio
+#
+#     asyncio.run(add_event_data_to_db())

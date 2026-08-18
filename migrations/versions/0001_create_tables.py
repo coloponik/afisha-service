@@ -76,7 +76,7 @@ def upgrade() -> None:
         sa.Column("event_id", sa.Integer(), sa.ForeignKey("events.id"), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=False),
         sa.Column("amount", sa.Integer(), nullable=False),
-        sa.Column("payment_commission", sa.Integer(), nullable=False),
+        sa.Column("payment_commission", sa.Integer(), nullable=True),
         sa.Column("protection_price", sa.Integer(), nullable=True),
         sa.Column("with_protection", sa.Boolean(), nullable=False),
         sa.Column("status", booking_status, server_default="pending_payment", nullable=False),
