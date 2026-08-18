@@ -15,7 +15,6 @@ class PostgresEventQueue:
         self._stopping = False
 
     async def add_event_view(self, event_id: int) -> None:
-        print("ADD NEW EVENT")
         await self._queue.put(event_id)
 
     def start(self) -> None:
@@ -38,7 +37,6 @@ class PostgresEventQueue:
 
                 if event is None:
                     logger.info("Shutdown signal received")
-                    print("Shutdown signal received")
                     break
 
                 events.append(event)
@@ -52,7 +50,6 @@ class PostgresEventQueue:
 
         if events:
             logger.info("Flushing %d remaining events", len(events))
-            print(f"Flushing {len(events)} remaining events")
             await self._insert_events_to_db(events)
 
     async def _insert_events_to_db(self, events: list) -> None:
@@ -61,7 +58,6 @@ class PostgresEventQueue:
                 async with db.transaction() as tr:
                     await tr.events.update_or_create_event_view(events)
 
-            print("INSERTED EVENT TO DB")
             events.clear()
         except Exception as exc:
             logger.exception("Failed to persist event views")

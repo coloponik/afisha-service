@@ -1,7 +1,6 @@
 import asyncio
 import logging
 from ipaddress import ip_address
-from urllib import request
 from fastapi import Request
 
 from redis.exceptions import LockError
@@ -61,7 +60,9 @@ class EventService:
                 if event is not None:
                     return event
 
-                event = await self.db.events.get_event(event_id=event_id)
+                async with self.db.transaction() as db:
+                    event = await db.events.get_event(event_id=event_id)
+
                 await self.cache.set_event(event_id=event.id, event=event)
 
             return event
