@@ -1,7 +1,6 @@
 import asyncio
 import logging
 from ipaddress import ip_address
-from fastapi import Request
 
 from redis.exceptions import LockError
 
@@ -26,19 +25,19 @@ class EventService:
         self.cache = cache
         self.queue = queue
 
-    async def get_event(self, event_id: int, request: Request) -> EventData:
+    async def get_event(self, event_id: int, client_host: str) -> EventData:
         event = await self.cache.get_event(event_id=event_id)
 
         if event is None:
             event = await self._refresh_event_with_lock(event_id)
 
-        asyncio.create_task(self.register_user_view(event_id, request))
+        asyncio.create_task(self.register_user_view(event_id, client_host))
 
         return EventData.model_validate(event)
 
-    async def register_user_view(self, event_id: int, request: Request) -> None:
+    async def register_user_view(self, event_id: int, client_host: str) -> None:
         try:
-            normalized_ip = str(ip_address(request.client.host))
+            normalized_ip = str(ip_address(client_host))
             is_new = await self.cache.register_event_view(event_id=event_id, ip=normalized_ip)
 
             if is_new:

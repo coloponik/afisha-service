@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from collections import Counter
 
 from afisha.exceptions import EventViewPersistenceError
 from afisha.infrastracture.postgres.manager import PostgresClient
@@ -53,11 +54,27 @@ class PostgresEventQueue:
             await self._insert_events_to_db(events)
 
     async def _insert_events_to_db(self, events: list) -> None:
+        counts = Counter(events)
+
+        if not counts:
+            return
+
+        event_views = [
+            {
+                "event_id": event_id,
+                "views_count": count
+            }
+            for event_id, count in counts.items()
+        ]
+
         try:
             async with self._postgres.session() as db:
                 async with db.transaction() as tr:
-                    await tr.events.update_or_create_event_view(events)
-
+                    await tr.events.update_or_create_event_view(event_views)
+            logger.info(
+                "Persisted %d event views to database",
+                len(events)
+            )
             events.clear()
         except Exception as exc:
             logger.exception("Failed to persist event views")

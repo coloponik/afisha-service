@@ -1,5 +1,3 @@
-from collections import Counter
-
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 
@@ -40,21 +38,8 @@ class EventRepo(BaseRepo):
 
         return await self.session.scalar(query)
 
-    async def update_or_create_event_view(self, events: list[int]) -> None:
-        counts = Counter(events)
-
-        if not counts:
-            return
-
-        values = [
-            {
-                "event_id": event_id,
-                "views_count": count
-            }
-            for event_id, count in counts.items()
-        ]
-
-        stmt = insert(EventView).values(values)
+    async def update_or_create_event_view(self, event_views: list[dict]) -> None:
+        stmt = insert(EventView).values(event_views)
         stmt = stmt.on_conflict_do_update(
                 index_elements=[EventView.event_id],
                 set_={

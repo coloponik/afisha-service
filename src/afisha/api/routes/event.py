@@ -28,7 +28,7 @@ async def get_event(
         service: FromDishka[EventService]
 ) -> EventData:
     """Возвращает описание мероприятия."""
-    return await service.get_event(event_id=event_id, request=request)
+    return await service.get_event(event_id=event_id, client_host=request.client.host)
 
 
 @router.get("/{event_id}/seats")
