@@ -31,23 +31,37 @@ class PostgresEventQueue:
 
     async def _flush_events(self) -> None:
         events = []
+        loop = asyncio.get_running_loop()
+        deadline = None
 
         while True:
             try:
-                event = await asyncio.wait_for(self._queue.get(), timeout=5)
+                if not events:
+                    event = await self._queue.get()
+                else:
+                    timeout = max(0, deadline - loop.time())
+                    event = await asyncio.wait_for(
+                        self._queue.get(),
+                        timeout=timeout
+                    )
 
                 if event is None:
                     logger.info("Shutdown signal received")
                     break
 
+                if not events:
+                    deadline = loop.time() + 5
+
                 events.append(event)
 
                 if len(events) >= 10:
                     await self._insert_events_to_db(events)
+                    deadline = None
 
             except asyncio.TimeoutError:
                 if events:
                     await self._insert_events_to_db(events)
+                deadline = None
 
         if events:
             logger.info("Flushing %d remaining events", len(events))
