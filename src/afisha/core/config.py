@@ -63,6 +63,14 @@ class RedisConfig(BaseModel):
         return f"redis://:{password}@{self.host}:{self.port}/{self.database}"
 
 
+class ReportConfig(BaseModel):
+    storage_path: str
+
+
+class TaskiqConfig(BaseModel):
+    admin_url: str
+
+
 class ConnectorsConfig(BaseModel):
     payment: PaymentApiConfig
     protection: ProtectionApiConfig
@@ -77,6 +85,8 @@ class Settings(BaseSettings):
     project: ProjectConfig
     postgres: PostgresConfig
     redis: RedisConfig
+    report: ReportConfig
+    taskiq: TaskiqConfig
     connectors: ConnectorsConfig
     booking: BookingConfig
 

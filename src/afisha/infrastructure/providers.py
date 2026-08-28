@@ -9,6 +9,7 @@ from afisha.infrastructure.postgres.manager import DatabaseManager, PostgresClie
 from afisha.infrastructure.postgres.queue import PostgresEventQueue
 from afisha.infrastructure.redis.cache_repo import CacheRepo
 from afisha.infrastructure.redis.manager import RedisManager, create_redis_manager
+from afisha.infrastructure.tasks.publisher import TaskPublisher
 
 
 class PostgresProvider(Provider):
@@ -40,6 +41,12 @@ class RedisProvider(Provider):
         yield redis
 
         await redis.close()
+
+
+class TaskPublisherProvider(Provider):
+    @provide(scope=Scope.APP)
+    async def get_task_publisher(self) -> TaskPublisher:
+        return TaskPublisher()
 
 
 class CacheProvider(Provider):
