@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from afisha.infrastracture.api_connectors.schemas import (
+from afisha.infrastructure.api_connectors.schemas import (
     CalculatedPaymentData,
     CalculatedProtectionData,
 )

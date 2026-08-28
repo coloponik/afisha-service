@@ -10,11 +10,11 @@ from afisha.core.config import (
     ProjectConfig,
     Settings, RedisConfig,
 )
-from afisha.infrastracture.api_connectors.internal.payment import PaymentConnector
-from afisha.infrastracture.api_connectors.internal.protection import ProtectionConnector
-from afisha.infrastracture.postgres.manager import DatabaseManager
-from afisha.infrastracture.postgres.queue import PostgresEventQueue
-from afisha.infrastracture.redis.cache_repo import CacheRepo
+from afisha.infrastructure.api_connectors.internal.payment import PaymentConnector
+from afisha.infrastructure.api_connectors.internal.protection import ProtectionConnector
+from afisha.infrastructure.postgres.manager import DatabaseManager
+from afisha.infrastructure.postgres.queue import PostgresEventQueue
+from afisha.infrastructure.redis.cache_repo import CacheRepo
 from afisha.services.booking import BookingService
 from afisha.services.event import EventService
 from afisha.services.event_analytics import EventAnalyticsService

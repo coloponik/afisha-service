@@ -2,7 +2,7 @@ from dishka import AsyncContainer, make_async_container
 
 from afisha.application.providers import ConfigProvider, ServiceProvider
 from afisha.core.config import Settings
-from afisha.infrastracture.providers import (
+from afisha.infrastructure.providers import (
     ConnectorsProvider,
     PostgresProvider,
     RedisProvider,

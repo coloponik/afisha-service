@@ -3,8 +3,8 @@ from sqlalchemy.dialects.postgresql import insert
 
 from afisha.application.dto import EventRead
 from afisha.exceptions import EventNotFoundError
-from afisha.infrastracture.postgres.models import Event, EventView
-from afisha.infrastracture.postgres.repositories.base import BaseRepo
+from afisha.infrastructure.postgres.models import Event, EventView
+from afisha.infrastructure.postgres.repositories.base import BaseRepo
 
 
 class EventRepo(BaseRepo):

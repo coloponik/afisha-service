@@ -2,8 +2,8 @@ from collections.abc import AsyncIterator
 
 from dishka import Provider, Scope, provide
 
-from afisha.infrastracture.api_connectors.internal.payment import PaymentConnector
-from afisha.infrastracture.api_connectors.internal.protection import ProtectionConnector
+from afisha.infrastructure.api_connectors.internal.payment import PaymentConnector
+from afisha.infrastructure.api_connectors.internal.protection import ProtectionConnector
 from tests.integration.mock_connectors import MockPaymentConnector, MockProtectionConnector
 
 

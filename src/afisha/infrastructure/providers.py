@@ -3,12 +3,12 @@ from collections.abc import AsyncIterator
 from dishka import Provider, Scope, provide
 
 from afisha.core.config import ConnectorsConfig, PostgresConfig, RedisConfig
-from afisha.infrastracture.api_connectors.internal.payment import PaymentConnector
-from afisha.infrastracture.api_connectors.internal.protection import ProtectionConnector
-from afisha.infrastracture.postgres.manager import DatabaseManager, PostgresClient
-from afisha.infrastracture.postgres.queue import PostgresEventQueue
-from afisha.infrastracture.redis.cache_repo import CacheRepo
-from afisha.infrastracture.redis.manager import RedisManager, create_redis_manager
+from afisha.infrastructure.api_connectors.internal.payment import PaymentConnector
+from afisha.infrastructure.api_connectors.internal.protection import ProtectionConnector
+from afisha.infrastructure.postgres.manager import DatabaseManager, PostgresClient
+from afisha.infrastructure.postgres.queue import PostgresEventQueue
+from afisha.infrastructure.redis.cache_repo import CacheRepo
+from afisha.infrastructure.redis.manager import RedisManager, create_redis_manager
 
 
 class PostgresProvider(Provider):

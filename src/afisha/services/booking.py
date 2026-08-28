@@ -18,14 +18,14 @@ from afisha.exceptions import (
     SeatAlreadySoldError,
     SeatsNotFoundError,
 )
-from afisha.infrastracture.api_connectors.internal.payment import PaymentConnector
-from afisha.infrastracture.api_connectors.internal.protection import ProtectionConnector
-from afisha.infrastracture.api_connectors.schemas import (
+from afisha.infrastructure.api_connectors.internal.payment import PaymentConnector
+from afisha.infrastructure.api_connectors.internal.protection import ProtectionConnector
+from afisha.infrastructure.api_connectors.schemas import (
     CalculatedPaymentData,
     CalculatedProtectionData,
 )
-from afisha.infrastracture.postgres.manager import DatabaseManager
-from afisha.infrastracture.postgres.models import BookingStatus, EventSeat, SeatStatus
+from afisha.infrastructure.postgres.manager import DatabaseManager
+from afisha.infrastructure.postgres.models import BookingStatus, EventSeat, SeatStatus
 
 logger = logging.getLogger(__name__)
 

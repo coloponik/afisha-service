@@ -3,7 +3,7 @@ import logging
 from collections import Counter
 
 from afisha.exceptions import EventViewPersistenceError
-from afisha.infrastracture.postgres.manager import PostgresClient
+from afisha.infrastructure.postgres.manager import PostgresClient
 
 logger = logging.getLogger(__name__)
 

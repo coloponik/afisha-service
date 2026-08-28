@@ -10,9 +10,9 @@ from sqlalchemy import text
 from afisha.application.app import create_fastapi_app
 from afisha.application.providers import ConfigProvider, ServiceProvider
 from afisha.core.config import Settings
-from afisha.infrastracture.postgres.manager import PostgresClient, DatabaseManager
-from afisha.infrastracture.postgres.queue import PostgresEventQueue
-from afisha.infrastracture.providers import (
+from afisha.infrastructure.postgres.manager import PostgresClient, DatabaseManager
+from afisha.infrastructure.postgres.queue import PostgresEventQueue
+from afisha.infrastructure.providers import (
     PostgresProvider,
     RedisProvider,
     CacheProvider,

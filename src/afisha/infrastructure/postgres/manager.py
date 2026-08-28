@@ -9,10 +9,10 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from afisha.core.config import PostgresConfig
-from afisha.infrastracture.postgres.repositories.bookings import BookingRepo
-from afisha.infrastracture.postgres.repositories.event_seats import EventSeatRepo
-from afisha.infrastracture.postgres.repositories.events import EventRepo
-from afisha.infrastracture.postgres.repositories.seats import SeatRepo
+from afisha.infrastructure.postgres.repositories.bookings import BookingRepo
+from afisha.infrastructure.postgres.repositories.event_seats import EventSeatRepo
+from afisha.infrastructure.postgres.repositories.events import EventRepo
+from afisha.infrastructure.postgres.repositories.seats import SeatRepo
 
 
 class PostgresClient:

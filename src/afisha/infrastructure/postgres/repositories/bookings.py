@@ -3,8 +3,8 @@ from datetime import datetime
 from sqlalchemy import Integer, and_, func, insert, select, update
 
 from afisha.application.dto import BookingRead, SalesRead
-from afisha.infrastracture.postgres.models import Booking, BookingStatus, EventSeat
-from afisha.infrastracture.postgres.repositories.base import BaseRepo
+from afisha.infrastructure.postgres.models import Booking, BookingStatus, EventSeat
+from afisha.infrastructure.postgres.repositories.base import BaseRepo
 
 
 class BookingRepo(BaseRepo):

@@ -3,7 +3,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from afisha.infrastracture.postgres.models import BookingStatus, SeatStatus
+from afisha.infrastructure.postgres.models import BookingStatus, SeatStatus
 
 
 class LocationRead(BaseModel):

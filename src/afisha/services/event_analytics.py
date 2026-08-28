@@ -9,7 +9,7 @@ from afisha.application.dto import (
     SalesRead,
 )
 from afisha.exceptions import DashboardUnavailableError, ForbiddenError
-from afisha.infrastracture.postgres.manager import DatabaseManager
+from afisha.infrastructure.postgres.manager import DatabaseManager
 
 logger = logging.getLogger(__name__)
 

@@ -4,7 +4,7 @@ import random
 from redis.asyncio.lock import Lock
 
 from afisha.application.dto import EventRead
-from afisha.infrastracture.redis.manager import RedisManager
+from afisha.infrastructure.redis.manager import RedisManager
 
 
 class CacheRepo:

@@ -3,13 +3,13 @@ from datetime import datetime
 from sqlalchemy import Float, Numeric, and_, cast, func, or_, select, update
 
 from afisha.application.dto import OccupancyRead
-from afisha.infrastracture.postgres.models import (
+from afisha.infrastructure.postgres.models import (
     Booking,
     BookingStatus,
     EventSeat,
     SeatStatus,
 )
-from afisha.infrastracture.postgres.repositories.base import BaseRepo
+from afisha.infrastructure.postgres.repositories.base import BaseRepo
 
 
 class EventSeatRepo(BaseRepo):
