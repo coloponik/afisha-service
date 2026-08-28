@@ -172,3 +172,16 @@ class PaymentCompleted(BaseModel):
     status: BookingStatus
     charged_amount: int
     transaction_id: str
+
+
+class ReportData(BaseModel):
+    model_config = ConfigDict(from_attributes=True, frozen=True)
+    id: str
+    event_id: int
+    status: str
+    file_path: str | None = None
+    payload: dict
+    error: str | None = None
+    created_at: datetime
+    updated_at: datetime
+    completed_at: datetime | None = None
