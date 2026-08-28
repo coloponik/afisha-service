@@ -20,7 +20,7 @@ from reportlab.platypus import (
 
 from afisha.application.dto import EventDashboard
 
-PACKAGE_DIR = Path(__file__).resolve().parents[1]
+PACKAGE_DIR = Path(__file__).resolve().parents[2]
 ASSETS_DIR = PACKAGE_DIR / "assets"
 FONT_DIR = ASSETS_DIR / "fonts"
 
