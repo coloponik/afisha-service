@@ -1,6 +1,8 @@
 import asyncio
 import logging
 
+from sqlalchemy.exc import SQLAlchemyError
+
 from afisha.application.dto import (
     EventDashboard,
     OccupancyDashboard,
@@ -61,16 +63,25 @@ class EventAnalyticsService:
             event_id: int,
             event_dashboard: EventDashboard
     ) -> None:
-        async with self.db.transaction() as db:
-            report_id = await db.reports.create_report(
-                event_id=event_id,
-                payload=event_dashboard.model_dump(mode="json")
+        try:
+            async with self.db.transaction() as db:
+                report_id = await db.reports.create_report(
+                    event_id=event_id,
+                    payload=event_dashboard.model_dump(mode="json")
+                )
+        except SQLAlchemyError:
+            logger.exception(
+                "Failed to create event report metadata",
+                extra={"event_id": event_id}
             )
-        if report_id:
+
+        try:
             await self.task_publisher.schedule_event_dashboard_report(report_id)
-        else:
-            logger.error("Failed to add report metadata to database")
-            return
+        except Exception:
+            logger.exception(
+                "Failed to schedule event report task",
+                extra={"report_id": report_id}
+            )
 
     async def _get_sales_analytics(self, event_id: int) -> SalesRead:
         async with self.db.transaction() as db:
