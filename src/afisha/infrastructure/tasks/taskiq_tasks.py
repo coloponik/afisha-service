@@ -1,4 +1,6 @@
 import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from datetime import timedelta
 
 from dishka import Scope
@@ -6,9 +8,22 @@ from dishka import Scope
 from afisha.core.container import create_container
 from afisha.infrastructure.tasks.taskiq_app import broker_cpu
 from afisha.main import settings
+from afisha.services.booking import BookingService
 from afisha.services.report import ReportService
 
 logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def get_task_service(service_type) -> AsyncIterator:
+    container = create_container(settings)
+
+    try:
+        async with container(scope=Scope.REQUEST) as request_container:
+            service = await request_container.get(service_type)
+            yield service
+    finally:
+        await container.close()
 
 
 @broker_cpu.task(
@@ -41,3 +56,17 @@ async def recover_pending_pdf_reports() -> None:
     async with container(scope=Scope.REQUEST) as request_container:
         service = await request_container.get(ReportService)
         await service.recover_pending_reports()
+
+
+@broker_cpu.task(
+    task_name="cleanup_expired_bookings",
+    schedule=[
+        {
+            "schedule_id": "cleanup_expired_bookings-every_minute",
+            "interval": timedelta(minutes=1)
+        }
+    ]
+)
+async def cleanup_expired_bookings() -> None:
+    async with get_task_service(BookingService) as service:
+        await service.release_expired_bookings()

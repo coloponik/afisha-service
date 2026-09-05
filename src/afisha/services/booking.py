@@ -166,6 +166,19 @@ class BookingService:
             await db.event_seats.release_seats(booking_id)
             await db.bookings.cancel(booking_id)
 
+    async def release_expired_bookings(self) -> None:
+        """Освобождает места и удаляет просроченные неоплаченные бронирования."""
+        timestamp = datetime.datetime.now(datetime.UTC)
+
+        async with self.db.transaction() as db:
+            booking_ids = await db.bookings.get_expired(current_time=timestamp)
+
+            if not booking_ids:
+                return
+
+            await db.event_seats.release_seats_bulk(booking_ids)
+            await db.bookings.delete_by_ids(booking_ids)
+
     async def _compensate_booking(self, booking: BookingRead) -> None:
         """Выполняет компенсирующие действия при ошибке оформления брони."""
         try:

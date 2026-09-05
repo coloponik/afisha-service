@@ -54,6 +54,19 @@ class EventSeatRepo(BaseRepo):
 
         await self.session.execute(stmt)
 
+    async def release_seats_bulk(self, booking_ids: list[int]) -> None:
+        stmt = (
+            update(EventSeat)
+            .where(EventSeat.booking_id.in_(booking_ids))
+            .values(
+                status=SeatStatus.available,
+                reserved_until=None,
+                booking_id=None
+            )
+        )
+
+        await self.session.execute(stmt)
+
     async def get_occupancy(self, event_id: int) -> OccupancyRead:
         query = (
             select(
