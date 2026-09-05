@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def get_task_service(service_type) -> AsyncIterator:
+async def get_task_service[T](service_type: type[T]) -> AsyncIterator[T]:
     container = create_container(settings)
 
     try:
@@ -33,10 +33,8 @@ async def get_task_service(service_type) -> AsyncIterator:
     max_retries=2
 )
 async def generate_event_pdf_report(report_id: str) -> None:
-    container = create_container(settings)
     logger.info("Report started")
-    async with container(scope=Scope.REQUEST) as request_container:
-        service = await request_container.get(ReportService)
+    async with get_task_service(ReportService) as service:
         await service.generate_event_report(report_id)
     logger.info("Report finished")
 
@@ -51,11 +49,9 @@ async def generate_event_pdf_report(report_id: str) -> None:
     ]
 )
 async def recover_pending_pdf_reports() -> None:
-    container = create_container(settings)
-
-    async with container(scope=Scope.REQUEST) as request_container:
-        service = await request_container.get(ReportService)
+    async with get_task_service(ReportService) as service:
         await service.recover_pending_reports()
+    logger.info("Stuck pending reports recovered")
 
 
 @broker_cpu.task(
@@ -70,3 +66,4 @@ async def recover_pending_pdf_reports() -> None:
 async def cleanup_expired_bookings() -> None:
     async with get_task_service(BookingService) as service:
         await service.release_expired_bookings()
+    logger.info("Expired bookings cleaned up")
