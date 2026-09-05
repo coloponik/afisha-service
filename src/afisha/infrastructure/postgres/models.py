@@ -143,6 +143,7 @@ class Report(Base):
     file_path: Mapped[str | None]
     payload: Mapped[dict] = mapped_column(JSONB)
     error: Mapped[str | None]
+    claim_version: Mapped[int] = mapped_column(nullable=False, server_default="0")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=text("now()"),

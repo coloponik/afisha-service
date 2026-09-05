@@ -65,6 +65,8 @@ class RedisConfig(BaseModel):
 
 class ReportConfig(BaseModel):
     storage_path: str
+    pending_timeout: int = 5
+    processing_timeout: int = 10
 
 
 class TaskiqConfig(BaseModel):

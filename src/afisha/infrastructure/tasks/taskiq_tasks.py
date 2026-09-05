@@ -1,4 +1,5 @@
 import logging
+from datetime import timedelta
 
 from dishka import Scope
 
@@ -25,3 +26,20 @@ async def generate_event_pdf_report(report_id: str) -> None:
         await service.generate_event_report(report_id)
     print("Task finished")
     logger.info("Report finished")
+
+
+@broker_cpu.task(
+    task_name="recover_pending_pdf_reports",
+    schedule=[
+        {
+            "schedule_id": "recover_pending_pdf_reports-every-minute",
+            "interval": timedelta(minutes=1)
+        }
+    ]
+)
+async def recover_pending_pdf_reports() -> None:
+    container = create_container(settings)
+
+    async with container(scope=Scope.REQUEST) as request_container:
+        service = await request_container.get(ReportService)
+        await service.recover_pending_reports()

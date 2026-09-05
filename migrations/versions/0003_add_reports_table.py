@@ -2,7 +2,7 @@
 
 Revision ID: 0003
 Revises: 0002
-Create Date: 2026-08-28 01:25:02.109517
+Create Date: 2026-09-05 01:50:57.919104
 """
 from typing import Sequence, Union
 
@@ -24,6 +24,7 @@ def upgrade() -> None:
     sa.Column('file_path', sa.String(), nullable=True),
     sa.Column('payload', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.Column('error', sa.String(), nullable=True),
+    sa.Column('claim_version', sa.Integer(), server_default='0', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('completed_at', sa.DateTime(timezone=True), nullable=True),

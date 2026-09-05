@@ -104,9 +104,11 @@ class ServiceProvider(Provider):
     def get_report_service(
             self,
             db: DatabaseManager,
-            config: ReportConfig
+            config: ReportConfig,
+            task_publisher: TaskPublisher
     ) -> ReportService:
         return ReportService(
             db=db,
-            storage_path=config.storage_path
+            config=config,
+            task_publisher=task_publisher
         )

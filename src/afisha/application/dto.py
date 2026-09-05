@@ -182,6 +182,7 @@ class ReportData(BaseModel):
     file_path: str | None = None
     payload: dict
     error: str | None = None
+    claim_version: int
     created_at: datetime
     updated_at: datetime
     completed_at: datetime | None = None

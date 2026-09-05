@@ -1,5 +1,6 @@
-from taskiq import SimpleRetryMiddleware
+from taskiq import SimpleRetryMiddleware, TaskiqScheduler
 from taskiq.middlewares import TaskiqAdminMiddleware
+from taskiq.schedule_sources import LabelScheduleSource
 from taskiq_redis import RedisStreamBroker
 
 from afisha.infrastructure.tasks.config import settings
@@ -16,4 +17,10 @@ broker_cpu = RedisStreamBroker(
         api_token="supersecret",
         taskiq_broker_name="afisha-cpu"
     )
+)
+
+
+scheduler = TaskiqScheduler(
+    broker=broker_cpu,
+    sources=[LabelScheduleSource(broker=broker_cpu)]
 )
