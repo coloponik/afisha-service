@@ -5,6 +5,7 @@ from datetime import timedelta
 
 from dishka import Scope
 
+from afisha.application.dto import ProtectionRetryData
 from afisha.core.container import create_container
 from afisha.infrastructure.tasks.taskiq_app import broker_cpu
 from afisha.main import settings
@@ -24,6 +25,34 @@ async def get_task_service[T](service_type: type[T]) -> AsyncIterator[T]:
             yield service
     finally:
         await container.close()
+
+
+@broker_cpu.task(
+    task_name="booking_protection_retry",
+    ack_type="when_executed",
+    retry_on_error=True,
+    max_retries=1
+)
+async def booking_protection_retry(payload: dict) -> None:
+    retry_data = ProtectionRetryData.model_validate(payload)
+
+    async with get_task_service(BookingService) as service:
+        await service.fetch_and_save_protection(retry_data)
+
+
+@broker_cpu.task(
+    task_name="cleanup_expired_bookings",
+    schedule=[
+        {
+            "schedule_id": "cleanup_expired_bookings-every_minute",
+            "interval": timedelta(minutes=1)
+        }
+    ]
+)
+async def cleanup_expired_bookings() -> None:
+    async with get_task_service(BookingService) as service:
+        await service.release_expired_bookings()
+    logger.info("Expired bookings cleaned up")
 
 
 @broker_cpu.task(
@@ -53,17 +82,3 @@ async def recover_pending_pdf_reports() -> None:
         await service.recover_pending_reports()
     logger.info("Stuck pending reports recovered")
 
-
-@broker_cpu.task(
-    task_name="cleanup_expired_bookings",
-    schedule=[
-        {
-            "schedule_id": "cleanup_expired_bookings-every_minute",
-            "interval": timedelta(minutes=1)
-        }
-    ]
-)
-async def cleanup_expired_bookings() -> None:
-    async with get_task_service(BookingService) as service:
-        await service.release_expired_bookings()
-    logger.info("Expired bookings cleaned up")

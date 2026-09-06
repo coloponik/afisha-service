@@ -10,7 +10,7 @@ from afisha.application.dto import (
     EventRead,
     PaymentQuote,
     ProtectionQuote,
-    SeatRead,
+    SeatRead, ProtectionRetryData,
 )
 from afisha.exceptions import (
     PaymentUnavailableError,
@@ -26,6 +26,7 @@ from afisha.infrastructure.api_connectors.schemas import (
 )
 from afisha.infrastructure.postgres.manager import DatabaseManager
 from afisha.infrastructure.postgres.models import BookingStatus, EventSeat, SeatStatus
+from afisha.infrastructure.tasks.publisher import TaskPublisher
 
 logger = logging.getLogger(__name__)
 
@@ -43,11 +44,13 @@ class BookingService:
             db: DatabaseManager,
             payment_connector: PaymentConnector,
             protection_connector: ProtectionConnector,
+            task_publisher: TaskPublisher,
             booking_ttl: datetime.timedelta
     ) -> None:
         self.db = db
         self.payment_connector = payment_connector
         self.protection_connector = protection_connector
+        self.task_publisher = task_publisher
         self.booking_ttl = booking_ttl
 
     async def reserve(
@@ -73,6 +76,14 @@ class BookingService:
             event_category=event.category,
             event_starts_at=event.starts_at
         )
+
+        retry_data = ProtectionRetryData(
+            booking_id=booking.id,
+            ticket_amount=booking.amount,
+            event_category=event.category,
+            event_starts_at=event.starts_at
+        )
+
         # Параллельный вызов внешних сервисов с единым timeout на обе операции,
         # чтобы "не заставлять пользователя ждать дольше 3-х секунд"
         payment, protection = await asyncio.gather(
@@ -86,6 +97,9 @@ class BookingService:
             payment = self._validate_payment_response(payment)
             # Protection необязателен, при ошибке продолжаем без него
             protection = self._handle_protection_response(protection)
+
+            if protection is None:
+                await self.task_publisher.schedule_protection_retry(retry_data)
 
             protection_price = protection.price if protection else None
             with_protection = protection.available if protection else False
@@ -159,6 +173,21 @@ class BookingService:
             )
 
         return booking
+
+    async def fetch_and_save_protection(self, data: ProtectionRetryData) -> None:
+        protection = await self.protection_connector.get_protection_info(
+            booking_id=data.booking_id,
+            ticket_amount=data.ticket_amount,
+            event_category=data.event_category,
+            event_starts_at=data.event_starts_at
+        )
+
+        await self.db.bookings.update_protection_if_pending(
+            booking_id=data.booking_id,
+            protection_price=protection.price,
+            with_protection=protection.available
+        )
+        await self.db.commit()
 
     async def release_booking(self, booking_id: int) -> None:
         """Освобождает места и отменяет бронь."""

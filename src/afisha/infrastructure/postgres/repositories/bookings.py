@@ -68,6 +68,26 @@ class BookingRepo(BaseRepo):
 
         await self.session.execute(stmt)
 
+    async def update_protection_if_pending(
+            self,
+            booking_id: int,
+            protection_price: int | None,
+            with_protection: bool
+    ) -> None:
+        stmt = (
+            update(Booking)
+            .where(
+                Booking.id == booking_id,
+                Booking.status == BookingStatus.pending_payment
+            )
+            .values(
+                protection_price=protection_price,
+                with_protection=with_protection
+            )
+        )
+
+        await self.session.execute(stmt)
+
     async def cancel(self, booking_id: int) -> None:
         stmt = (
             update(Booking)

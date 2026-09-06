@@ -91,12 +91,14 @@ class ServiceProvider(Provider):
             db: DatabaseManager,
             payment_connector: PaymentConnector,
             protection_connector: ProtectionConnector,
+            task_publisher: TaskPublisher,
             config: BookingConfig
     ) -> BookingService:
         return BookingService(
             db=db,
             payment_connector=payment_connector,
             protection_connector=protection_connector,
+            task_publisher=task_publisher,
             booking_ttl=timedelta(minutes=config.booking_ttl_minutes)
         )
 

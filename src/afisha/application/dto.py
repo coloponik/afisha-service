@@ -144,6 +144,13 @@ class ProtectionQuote(BaseModel):
     description: str | None = None
 
 
+class ProtectionRetryData(BaseModel):
+    booking_id: int
+    ticket_amount: int
+    event_category: str
+    event_starts_at: datetime
+
+
 class CheckoutBooking(BaseModel):
     id: int
     event_title: str
