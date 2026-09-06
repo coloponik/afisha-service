@@ -135,6 +135,41 @@ class BookingService:
             protection=protection
         )
 
+    async def fetch_and_save_protection(self, data: ProtectionRetryData) -> None:
+        """Получает и сохраняет расчёт страховки для бронирования."""
+        protection = await self.protection_connector.get_protection_info(
+            booking_id=data.booking_id,
+            ticket_amount=data.ticket_amount,
+            event_category=data.event_category,
+            event_starts_at=data.event_starts_at
+        )
+
+        await self.db.bookings.update_protection_if_pending(
+            booking_id=data.booking_id,
+            protection_price=protection.price,
+            with_protection=protection.available
+        )
+        await self.db.commit()
+
+    async def release_booking(self, booking_id: int) -> None:
+        """Освобождает места и отменяет бронь."""
+        async with self.db.transaction() as db:
+            await db.event_seats.release_seats(booking_id)
+            await db.bookings.cancel(booking_id)
+
+    async def release_expired_bookings(self) -> None:
+        """Освобождает места и удаляет просроченные неоплаченные бронирования."""
+        timestamp = datetime.datetime.now(datetime.UTC)
+
+        async with self.db.transaction() as db:
+            booking_ids = await db.bookings.get_expired(current_time=timestamp)
+
+            if not booking_ids:
+                return
+
+            await db.event_seats.release_seats_bulk(booking_ids)
+            await db.bookings.delete_by_ids(booking_ids)
+
     async def _prepare_booking(
             self,
             event_id: int,
@@ -174,40 +209,6 @@ class BookingService:
 
         return booking
 
-    async def fetch_and_save_protection(self, data: ProtectionRetryData) -> None:
-        protection = await self.protection_connector.get_protection_info(
-            booking_id=data.booking_id,
-            ticket_amount=data.ticket_amount,
-            event_category=data.event_category,
-            event_starts_at=data.event_starts_at
-        )
-
-        await self.db.bookings.update_protection_if_pending(
-            booking_id=data.booking_id,
-            protection_price=protection.price,
-            with_protection=protection.available
-        )
-        await self.db.commit()
-
-    async def release_booking(self, booking_id: int) -> None:
-        """Освобождает места и отменяет бронь."""
-        async with self.db.transaction() as db:
-            await db.event_seats.release_seats(booking_id)
-            await db.bookings.cancel(booking_id)
-
-    async def release_expired_bookings(self) -> None:
-        """Освобождает места и удаляет просроченные неоплаченные бронирования."""
-        timestamp = datetime.datetime.now(datetime.UTC)
-
-        async with self.db.transaction() as db:
-            booking_ids = await db.bookings.get_expired(current_time=timestamp)
-
-            if not booking_ids:
-                return
-
-            await db.event_seats.release_seats_bulk(booking_ids)
-            await db.bookings.delete_by_ids(booking_ids)
-
     async def _compensate_booking(self, booking: BookingRead) -> None:
         """Выполняет компенсирующие действия при ошибке оформления брони."""
         try:
@@ -237,24 +238,6 @@ class BookingService:
 
             if seat.status == SeatStatus.sold:
                 raise SeatAlreadySoldError()
-
-    def _build_checkout_booking(
-            self,
-            booking: BookingRead,
-            event: EventRead,
-            seats: [SeatRead]
-    ) -> CheckoutBooking:
-        return CheckoutBooking(
-            id=booking.id,
-            event_title=event.title,
-            starts_at=event.starts_at,
-            seats=[seat.model_dump() for seat in seats],
-            base_amount=booking.amount,
-            payment_commission=booking.payment_commission,
-            protection_price=booking.protection_price,
-            with_protection=booking.with_protection,
-            reserved_until=booking.reserved_until
-        )
 
     def _validate_payment_response(
             self,
@@ -295,3 +278,20 @@ class BookingService:
             if protection is not None else protection
         )
 
+    def _build_checkout_booking(
+            self,
+            booking: BookingRead,
+            event: EventRead,
+            seats: [SeatRead]
+    ) -> CheckoutBooking:
+        return CheckoutBooking(
+            id=booking.id,
+            event_title=event.title,
+            starts_at=event.starts_at,
+            seats=[seat.model_dump() for seat in seats],
+            base_amount=booking.amount,
+            payment_commission=booking.payment_commission,
+            protection_price=booking.protection_price,
+            with_protection=booking.with_protection,
+            reserved_until=booking.reserved_until
+        )
