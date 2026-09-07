@@ -19,8 +19,21 @@ broker_cpu = RedisStreamBroker(
     )
 )
 
+broker_io = RedisStreamBroker(
+    url=settings.redis.url,
+    queue_name="io",
+    socket_timeout=None,
+    xread_count=1
+).with_middlewares(
+    SimpleRetryMiddleware(types_of_exceptions=(Exception,)),
+    TaskiqAdminMiddleware(
+        url=settings.taskiq.admin_url,
+        api_token="supersecret",
+        taskiq_broker_name="afisha-io"
+    )
+)
 
 scheduler = TaskiqScheduler(
-    broker=broker_cpu,
-    sources=[LabelScheduleSource(broker=broker_cpu)]
+    broker=broker_io,
+    sources=[LabelScheduleSource(broker=broker_io)]
 )

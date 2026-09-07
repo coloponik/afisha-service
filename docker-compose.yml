@@ -86,12 +86,28 @@ services:
     environment:
       <<: *afisha_env
     depends_on:
+      db:
+        condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
       afisha-taskiq-admin:
         condition: service_started
     volumes:
       - ./storage/reports:/app/storage/reports
+
+  afisha-taskiq-io-worker:
+    build:
+      context: .
+    command: taskiq worker afisha.infrastructure.tasks.taskiq_app:broker_io afisha.infrastructure.tasks.taskiq_tasks
+    environment:
+      <<: *afisha_env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      afisha-taskiq-admin:
+        condition: service_started
 
 #  app:
 #    build: .

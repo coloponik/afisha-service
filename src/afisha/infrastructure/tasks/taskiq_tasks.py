@@ -7,7 +7,7 @@ from dishka import Scope
 
 from afisha.application.dto import ProtectionRetryData
 from afisha.core.container import create_container
-from afisha.infrastructure.tasks.taskiq_app import broker_cpu
+from afisha.infrastructure.tasks.taskiq_app import broker_cpu, broker_io
 from afisha.main import settings
 from afisha.services.booking import BookingService
 from afisha.services.report import ReportService
@@ -27,7 +27,7 @@ async def get_task_service[T](service_type: type[T]) -> AsyncIterator[T]:
         await container.close()
 
 
-@broker_cpu.task(
+@broker_io.task(
     task_name="booking_protection_retry",
     ack_type="when_executed",
     retry_on_error=True,
@@ -40,7 +40,7 @@ async def booking_protection_retry(payload: dict) -> None:
         await service.fetch_and_save_protection(retry_data)
 
 
-@broker_cpu.task(
+@broker_io.task(
     task_name="cleanup_expired_bookings",
     schedule=[
         {
@@ -68,7 +68,7 @@ async def generate_event_pdf_report(report_id: str) -> None:
     logger.info("Report finished")
 
 
-@broker_cpu.task(
+@broker_io.task(
     task_name="recover_pending_pdf_reports",
     schedule=[
         {
