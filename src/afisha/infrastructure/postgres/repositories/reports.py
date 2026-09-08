@@ -107,18 +107,18 @@ class ReportRepo(BaseRepo):
 
         await self.session.execute(stmt)
 
-    # async def get_report(self, report_id: str) -> ReportData | None:
-    #     query = (
-    #         select(Report)
-    #         .where(Report.id == report_id)
-    #     )
-    #
-    #     result = await self.session.scalar(query)
-    #
-    #     if result is None:
-    #         return None
-    #
-    #     return ReportData.model_validate(result)
+    async def get_report(self, report_id: str) -> ReportData | None:
+        query = (
+            select(Report)
+            .where(Report.id == report_id)
+        )
+
+        result = await self.session.scalar(query)
+
+        if result is None:
+            return None
+
+        return ReportData.model_validate(result)
 
     # async def set_processing(self, report_id: str) -> None:
     #     stmt = (

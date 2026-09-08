@@ -1,4 +1,5 @@
 from collections.abc import AsyncGenerator
+from datetime import UTC, datetime, timedelta
 
 import httpx
 import pytest
@@ -8,23 +9,30 @@ from fastapi import FastAPI
 from sqlalchemy import text
 
 from afisha.application.app import create_fastapi_app
+from afisha.application.dto import EventDashboard, SalesDashboard, OccupancyDashboard
 from afisha.application.providers import ConfigProvider, ServiceProvider
 from afisha.core.config import Settings
 from afisha.infrastructure.postgres.manager import PostgresClient, DatabaseManager
+from afisha.infrastructure.postgres.models import BookingStatus
 from afisha.infrastructure.postgres.queue import PostgresEventQueue
 from afisha.infrastructure.providers import (
     PostgresProvider,
     RedisProvider,
     CacheProvider,
-    PostgresEventQueueProvider
+    PostgresEventQueueProvider, TaskPublisherProvider
 )
+from afisha.services.booking import BookingService
 from afisha.services.event import EventService
+from afisha.services.report import ReportService
 from tests.integration.mock_providers import MockConnectorsProvider
 
 
 @pytest.fixture(scope="session")
-def test_settings() -> Settings:
-    return Settings()
+def test_settings(tmp_path_factory: pytest.TempPathFactory) -> Settings:
+    tmp_path = tmp_path_factory.mktemp("reports")
+    settings = Settings()
+    settings.report.storage_path = tmp_path
+    return settings
 
 
 def make_test_container(settings: Settings) -> AsyncContainer:
@@ -35,6 +43,7 @@ def make_test_container(settings: Settings) -> AsyncContainer:
         RedisProvider(),
         CacheProvider(),
         PostgresEventQueueProvider(),
+        TaskPublisherProvider(),
         MockConnectorsProvider()
     )
 
@@ -94,10 +103,17 @@ async def clean_database(
                         bookings,
                         events,
                         seats,
-                        locations
+                        locations,
+                        reports
                     RESTART IDENTITY CASCADE
                 """)
             )
+
+
+@pytest.fixture
+async def booking_service(test_container: AsyncContainer) -> AsyncGenerator[EventService, None]:
+    async with test_container() as request_container:
+        yield await request_container.get(BookingService)
 
 
 @pytest.fixture
@@ -107,6 +123,61 @@ async def event_service(test_container: AsyncContainer) -> AsyncGenerator[EventS
 
 
 @pytest.fixture
+def fake_report_payload() -> EventDashboard:
+    return EventDashboard(
+        event_title="Test Event",
+        starts_at=datetime.now(UTC),
+        sales=SalesDashboard(
+            paid_orders=2,
+            sold_tickets=4,
+            revenue=1000,
+            average_order=500,
+        ),
+        occupancy=OccupancyDashboard(
+            total=10,
+            available=4,
+            reserved=2,
+            sold=4,
+            occupancy_percent=40,
+        ),
+    )
+
+
+@pytest.fixture
+def fake_bookings() -> list:
+    timestamp = datetime.now(UTC)
+
+    return [
+        {
+            "user_id": 1,
+            "amount": 1000,
+            "payment_commission": None,
+            "protection_price": None,
+            "with_protection": False,
+            "status": BookingStatus.pending_payment,
+            "reserved_until": timestamp - timedelta(minutes=1),
+        },
+        {
+            "user_id": 2,
+            "amount": 1000,
+            "payment_commission": None,
+            "protection_price": None,
+            "with_protection": False,
+            "status": BookingStatus.pending_payment,
+            "reserved_until": timestamp + timedelta(minutes=10),
+        },
+        {
+            "user_id": 3,
+            "amount": 1000,
+            "payment_commission": None,
+            "protection_price": None,
+            "with_protection": False,
+            "status": BookingStatus.paid,
+            "reserved_until": timestamp - timedelta(minutes=1),
+        },
+    ]
+
+@pytest.fixture
 async def postgres_event_queue(
     test_container: AsyncContainer,
 ) -> AsyncGenerator[PostgresEventQueue, None]:
@@ -114,6 +185,11 @@ async def postgres_event_queue(
         queue = await request_container.get(PostgresEventQueue)
         yield queue
 
+
+@pytest.fixture()
+async def report_service(test_container: AsyncContainer) -> AsyncGenerator[ReportService, None]:
+    async with test_container() as request_container:
+        yield await request_container.get(ReportService)
 
 @pytest.fixture
 async def running_test_app(test_app: FastAPI) -> FastAPI:
