@@ -50,6 +50,18 @@ class EventRead(BaseModel):
     base_price: int
 
 
+class EventData(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    organizer_id: int
+    location_id: int
+    title: str
+    description: str | None
+    category: str
+    starts_at: datetime
+    base_price: int
+
+
 class EventSeatRead(BaseModel):
     id: int
     event_id: int

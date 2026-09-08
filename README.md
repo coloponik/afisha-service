@@ -9,6 +9,7 @@ FastAPI-приложение для управления мероприятия�
 - SQLAlchemy 2.0 (async)
 - PostgreSQL
 - Alembic
+- Redis
 - Dishka
 - Docker Compose
 - Pytest
@@ -21,14 +22,15 @@ FastAPI-приложение для управления мероприятия�
 cp .env.dev.example .env.dev
 ```
 
-Через Docker Compose можно поднять базу, API платежей и API страховки:
+Через Docker Compose можно поднять PostgreSQL, Redis, API платежей и API страховки:
 
 ```bash
-docker compose up -d db payment-api protection-api
+docker compose up -d db payment-api protection-api redis
 ```
 
 Сервисы будут доступны:
 - PostgreSQL: localhost:7432
+- Redis: localhost:7379
 - Payment API: http://localhost:9001
 - Protection API: http://localhost:9002
 
@@ -55,7 +57,14 @@ http://localhost:8000
 
 ## Тесты
 
-Создать тестовую базу и применить миграции:
+Тестовая PostgreSQL-база создаётся автоматически при первом запуске PostgreSQL-контейнера.
+Тестовый Redis необходимо поднять отдельно:
+
+```bash
+docker compose up -d redis-test
+```
+
+Применить миграции к тестовой базе:
 
 ```bash
 ENV_FILE=.env.test uv run alembic upgrade head
@@ -77,6 +86,12 @@ GET /organizer/events/{event_id}/dashboard
 ```
 Возвращает организатору основную статистику по мероприятию: (продажи, заполняемость, средний чек и тд).
 
+```http
+GET /events/{event_id}
+```
+
+Возвращает описание мероприятия.
+
 ## Особенности реализации
 
 - Асинхронное взаимодействие с внешними Payment и Protection API.
@@ -84,3 +99,7 @@ GET /organizer/events/{event_id}/dashboard
 - Транзакционное резервирование мест с защитой от конфликтного бронирования.
 -  Компенсирующие действия при ошибках внешних сервисов.
 - Интеграционные тесты с отдельным тестовым окружением.
+- Кеширование мероприятий с TTL и jitter.
+- Distributed singleflight при cache miss.
+- Асинхронная консолидация просмотров в БД батчами.
+- Graceful shutdown с flush оставшихся событий.

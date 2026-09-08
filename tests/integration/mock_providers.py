@@ -4,7 +4,7 @@ from dishka import Provider, Scope, provide
 
 from afisha.infrastracture.api_connectors.internal.payment import PaymentConnector
 from afisha.infrastracture.api_connectors.internal.protection import ProtectionConnector
-from tests.mock_connectors import MockPaymentConnector, MockProtectionConnector
+from tests.integration.mock_connectors import MockPaymentConnector, MockProtectionConnector
 
 
 class MockConnectorsProvider(Provider):
