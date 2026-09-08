@@ -82,7 +82,7 @@ services:
   afisha-taskiq-cpu-worker:
     build:
       context: .
-    command: taskiq worker afisha.infrastructure.tasks.taskiq_app:broker_cpu afisha.infrastructure.tasks.taskiq_tasks
+    command: taskiq worker afisha.infrastructure.tasks.taskiq_app:broker_cpu afisha.infrastructure.tasks.taskiq_tasks --log-level INFO --workers 2 --max-async-tasks 1 --max-prefetch 1
     environment:
       <<: *afisha_env
     depends_on:
@@ -98,7 +98,7 @@ services:
   afisha-taskiq-io-worker:
     build:
       context: .
-    command: taskiq worker afisha.infrastructure.tasks.taskiq_app:broker_io afisha.infrastructure.tasks.taskiq_tasks
+    command: taskiq worker afisha.infrastructure.tasks.taskiq_app:broker_io afisha.infrastructure.tasks.taskiq_tasks --log-level INFO --workers 1
     environment:
       <<: *afisha_env
     depends_on:
