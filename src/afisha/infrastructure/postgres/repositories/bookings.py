@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from sqlalchemy import Integer, and_, func, insert, select, update
+from sqlalchemy import Integer, and_, func, insert, select, update, delete
 
 from afisha.application.dto import BookingRead, SalesRead
-from afisha.infrastracture.postgres.models import Booking, BookingStatus, EventSeat
-from afisha.infrastracture.postgres.repositories.base import BaseRepo
+from afisha.infrastructure.postgres.models import Booking, BookingStatus, EventSeat
+from afisha.infrastructure.postgres.repositories.base import BaseRepo
 
 
 class BookingRepo(BaseRepo):
@@ -68,6 +68,26 @@ class BookingRepo(BaseRepo):
 
         await self.session.execute(stmt)
 
+    async def update_protection_if_pending(
+            self,
+            booking_id: int,
+            protection_price: int | None,
+            with_protection: bool
+    ) -> None:
+        stmt = (
+            update(Booking)
+            .where(
+                Booking.id == booking_id,
+                Booking.status == BookingStatus.pending_payment
+            )
+            .values(
+                protection_price=protection_price,
+                with_protection=with_protection
+            )
+        )
+
+        await self.session.execute(stmt)
+
     async def cancel(self, booking_id: int) -> None:
         stmt = (
             update(Booking)
@@ -78,6 +98,27 @@ class BookingRepo(BaseRepo):
         )
 
         await self.session.execute(stmt)
+
+    async def delete_by_ids(self, booking_ids: list[int]) -> None:
+        stmt = (
+            delete(Booking)
+            .where(Booking.id.in_(booking_ids))
+        )
+
+        await self.session.execute(stmt)
+
+    async def get_expired(self, current_time: datetime) -> list[int]:
+        query = (
+            select(Booking.id)
+            .where(
+                Booking.status == BookingStatus.pending_payment,
+                Booking.reserved_until < current_time
+            )
+            .with_for_update(skip_locked=True)
+        )
+
+        result = await self.session.scalars(query)
+        return list(result.all())
 
     async def get_sales(self, event_id: int) -> SalesRead:
         sold_tickets = (

@@ -5,7 +5,7 @@ from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from afisha.core.config import Settings
-from afisha.infrastracture.postgres.models import Base
+from afisha.infrastructure.postgres.models import Base
 
 settings = Settings()
 

@@ -1,6 +1,8 @@
 import asyncio
 import logging
 
+from sqlalchemy.exc import SQLAlchemyError
+
 from afisha.application.dto import (
     EventDashboard,
     OccupancyDashboard,
@@ -9,13 +11,19 @@ from afisha.application.dto import (
     SalesRead,
 )
 from afisha.exceptions import DashboardUnavailableError, ForbiddenError
-from afisha.infrastracture.postgres.manager import DatabaseManager
+from afisha.infrastructure.postgres.manager import DatabaseManager
+from afisha.infrastructure.tasks.publisher import TaskPublisher
 
 logger = logging.getLogger(__name__)
 
 class EventAnalyticsService:
-    def __init__(self, db: DatabaseManager) -> None:
+    def __init__(
+            self,
+            db: DatabaseManager,
+            task_publisher: TaskPublisher
+    ) -> None:
         self.db = db
+        self.task_publisher = task_publisher
 
     async def get_dashboard(
             self,
@@ -40,13 +48,40 @@ class EventAnalyticsService:
 
         sales = self._build_sales_dashboard(sales)
         occupancy = self._build_occupancy_dashboard(occupancy)
-
-        return EventDashboard(
+        event_dashboard = EventDashboard(
             event_title=event.title,
             starts_at=event.starts_at,
             sales=sales,
             occupancy=occupancy
         )
+
+        await self._schedule_event_report(event_id, event_dashboard)
+        return event_dashboard
+
+    async def _schedule_event_report(
+            self,
+            event_id: int,
+            event_dashboard: EventDashboard
+    ) -> None:
+        try:
+            async with self.db.transaction() as db:
+                report_id = await db.reports.create_report(
+                    event_id=event_id,
+                    payload=event_dashboard.model_dump(mode="json")
+                )
+        except SQLAlchemyError:
+            logger.exception(
+                "Failed to create event report metadata",
+                extra={"event_id": event_id}
+            )
+
+        try:
+            await self.task_publisher.schedule_event_dashboard_report(report_id)
+        except Exception:
+            logger.exception(
+                "Failed to schedule event report task",
+                extra={"report_id": report_id}
+            )
 
     async def _get_sales_analytics(self, event_id: int) -> SalesRead:
         async with self.db.transaction() as db:

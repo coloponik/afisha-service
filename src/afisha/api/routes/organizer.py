@@ -2,7 +2,7 @@ from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter
 
-from afisha.api.dependencies import CurrentUserId
+from afisha.api.dependencies import CurrentUserId, EventId
 from afisha.application.dto import EventCreate, EventDashboard, EventRead
 from afisha.services.event_analytics import EventAnalyticsService
 
@@ -23,7 +23,7 @@ async def create_event(payload: EventCreate, organizer_id: CurrentUserId) -> Eve
 
 @router.get("/events/{event_id}/dashboard")
 async def get_event_dashboard(
-        event_id: int,
+        event_id: EventId,
         organizer_id: CurrentUserId,
         service: FromDishka[EventAnalyticsService]
 ) -> EventDashboard:

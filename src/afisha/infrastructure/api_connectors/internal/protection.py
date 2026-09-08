@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from afisha.infrastracture.api_connectors.base import BaseHTTPConnector
-from afisha.infrastracture.api_connectors.schemas import CalculatedProtectionData
+from afisha.infrastructure.api_connectors.base import BaseHTTPConnector
+from afisha.infrastructure.api_connectors.schemas import CalculatedProtectionData
 
 
 class ProtectionConnector(BaseHTTPConnector):

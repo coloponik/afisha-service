@@ -14,8 +14,12 @@ dependencies = [
     "pydantic-settings>=2.14.2",
     "pytest>=9.1.1",
     "redis>=8.1.0",
+    "redis-cli>=1.0.1",
+    "reportlab>=5.0.1",
     "ruff>=0.12.2",
     "sqlalchemy==2.0.41",
+    "taskiq>=0.12.5",
+    "taskiq-redis>=1.2.3",
     "uvicorn[standard]==0.35.0",
 ]
 

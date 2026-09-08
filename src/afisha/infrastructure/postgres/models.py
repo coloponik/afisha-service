@@ -1,8 +1,9 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, UniqueConstraint, String, text
 from sqlalchemy import Enum as SAEnum
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -63,7 +64,7 @@ class Event(Base):
     title: Mapped[str]
     description: Mapped[str | None]
     category: Mapped[str]
-    starts_at: Mapped[datetime] = mapped_column(DateTime(), index=True)
+    starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     base_price: Mapped[int]
 
 
@@ -94,7 +95,10 @@ class Booking(Base):
         server_default=BookingStatus.pending_payment.value,
         index=True,
     )
-    reserved_until: Mapped[datetime] = mapped_column(DateTime(), index=True)
+    reserved_until: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        index=True
+    )
 
 
 class EventSeat(Base):
@@ -115,7 +119,7 @@ class EventSeat(Base):
         server_default=SeatStatus.available.value,
         index=True,
     )
-    reserved_until: Mapped[datetime | None] = mapped_column(DateTime())
+    reserved_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     booking_id: Mapped[int | None] = mapped_column(
         ForeignKey("bookings.id"),
         index=True,
@@ -128,3 +132,26 @@ class EventSeat(Base):
             and self.reserved_until > now
         )
 
+
+class Report(Base):
+    """Хранит метаданные фоновой генерации отчёта по аналитике мероприятия."""
+
+    __tablename__ = "reports"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    event_id: Mapped[int] = mapped_column(ForeignKey("events.id"), index=True)
+    status: Mapped[str] = mapped_column(index=True)
+    file_path: Mapped[str | None]
+    payload: Mapped[dict] = mapped_column(JSONB)
+    error: Mapped[str | None]
+    claim_version: Mapped[int] = mapped_column(nullable=False, server_default="0")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=text("now()"),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=text("now()"),
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+    )

@@ -3,8 +3,8 @@ import pytest
 from dishka import AsyncContainer, Scope
 from sqlalchemy import select
 
-from afisha.infrastracture.postgres.manager import DatabaseManager
-from afisha.infrastracture.postgres.models import (
+from afisha.infrastructure.postgres.manager import DatabaseManager
+from afisha.infrastructure.postgres.models import (
     Booking,
     BookingStatus,
     EventSeat,

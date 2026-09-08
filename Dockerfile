@@ -5,10 +5,15 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
-RUN uv sync --no-dev
+RUN uv sync --frozen --no-dev --no-install-project
+#RUN uv sync --no-dev
+#COPY . .
+#ENV ENV_FILE=.env.dev
 
-COPY . .
+COPY src ./src
+RUN uv sync --frozen --no-dev
 
+ENV PATH="/app/.venv/bin:$PATH"
 ENV ENV_FILE=.env.dev
 
-CMD ["uv", "run", "uvicorn", "afisha.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uvicorn", "afisha.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

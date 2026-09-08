@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
-from afisha.infrastracture.postgres.manager import DatabaseManager
-from afisha.infrastracture.postgres.queue import PostgresEventQueue
+from afisha.infrastructure.postgres.manager import DatabaseManager
+from afisha.infrastructure.postgres.queue import PostgresEventQueue
 
 
 class TestPostgresEventQueue:

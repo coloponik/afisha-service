@@ -3,8 +3,8 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-# from afisha.infrastracture.postgres.db import engine
-from afisha.infrastracture.postgres.models import (
+# from afisha.infrastructure.postgres.db import engine
+from afisha.infrastructure.postgres.models import (
     Booking,
     BookingStatus,
     Event,
