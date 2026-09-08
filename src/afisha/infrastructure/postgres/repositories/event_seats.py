@@ -101,27 +101,30 @@ class EventSeatRepo(BaseRepo):
                 )
                 .label("sold_seats"),
 
-                func.round(
-                    (
-                        cast(
-                            func.count(EventSeat.id)
-                            .filter(
-                                or_(
-                                    EventSeat.status == SeatStatus.sold,
-                                    and_(
-                                        EventSeat.status == SeatStatus.reserved,
-                                        EventSeat.reserved_until > func.now(),
-                                        Booking.status == BookingStatus.pending_payment
+                func.coalesce(
+                    func.round(
+                        (
+                            cast(
+                                func.count(EventSeat.id)
+                                .filter(
+                                    or_(
+                                        EventSeat.status == SeatStatus.sold,
+                                        and_(
+                                            EventSeat.status == SeatStatus.reserved,
+                                            EventSeat.reserved_until > func.now(),
+                                            Booking.status == BookingStatus.pending_payment
+                                        )
                                     )
-                                )
-                            ),
-                            Numeric
-                        )
-                        /
-                        func.nullif(func.count(EventSeat.id), 0)
-                        * 100
+                                ),
+                                Numeric
+                            )
+                            /
+                            func.nullif(func.count(EventSeat.id), 0)
+                            * 100
+                        ),
+                        2
                     ),
-                    2
+                    0
                 )
                 .cast(Float)
                 .label("occupancy_percent")
