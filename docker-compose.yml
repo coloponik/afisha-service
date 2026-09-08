@@ -109,6 +109,15 @@ services:
       afisha-taskiq-admin:
         condition: service_started
 
+  afisha-taskiq-scheduler:
+    build:
+      context: .
+    command: taskiq scheduler afisha.infrastructure.tasks.taskiq_app:scheduler afisha.infrastructure.tasks.taskiq_tasks
+    environment:
+      <<: *afisha_env
+    depends_on:
+      redis:
+        condition: service_healthy
 #  app:
 #    build: .
 #    ports:
