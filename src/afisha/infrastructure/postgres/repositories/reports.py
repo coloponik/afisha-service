@@ -2,9 +2,11 @@ from datetime import datetime, UTC
 from uuid import uuid4
 
 from sqlalchemy import update, insert, or_, and_, select
+from sqlalchemy.exc import SQLAlchemyError
 
 from afisha.application.dto import ReportData
 from afisha.enums import ReportStatus
+from afisha.exceptions import ReportPersistenceError
 from afisha.infrastructure.postgres.models import Report
 from afisha.infrastructure.postgres.repositories.base import BaseRepo
 
@@ -54,8 +56,11 @@ class ReportRepo(BaseRepo):
             )
         )
 
-        await self.session.execute(stmt)
-        return report_id
+        try:
+            await self.session.execute(stmt)
+            return report_id
+        except SQLAlchemyError as exc:
+            raise ReportPersistenceError() from exc
 
     async def get_stuck_pending(self, threshold: datetime) -> list[str]:
         query = (

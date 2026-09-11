@@ -1,8 +1,6 @@
 import asyncio
 import logging
 
-from sqlalchemy.exc import SQLAlchemyError
-
 from afisha.application.dto import (
     EventDashboard,
     OccupancyDashboard,
@@ -10,7 +8,7 @@ from afisha.application.dto import (
     SalesDashboard,
     SalesRead,
 )
-from afisha.exceptions import DashboardUnavailableError, ForbiddenError
+from afisha.exceptions import DashboardUnavailableError, ForbiddenError, ReportPersistenceError
 from afisha.infrastructure.postgres.manager import DatabaseManager
 from afisha.infrastructure.tasks.publisher import TaskPublisher
 
@@ -69,11 +67,9 @@ class EventAnalyticsService:
                     event_id=event_id,
                     payload=event_dashboard.model_dump(mode="json")
                 )
-        except SQLAlchemyError:
-            logger.exception(
-                "Failed to create event report metadata",
-                extra={"event_id": event_id}
-            )
+        except ReportPersistenceError as exc:
+            logger.exception(str(exc), extra={"event_id": event_id})
+            raise
 
         try:
             await self.task_publisher.schedule_event_dashboard_report(report_id)
