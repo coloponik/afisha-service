@@ -161,14 +161,14 @@ class BookingService:
         """Освобождает места и удаляет просроченные неоплаченные бронирования."""
         timestamp = datetime.datetime.now(datetime.UTC)
 
-        async with self.db.transaction() as db:
-            booking_ids = await db.bookings.get_expired(current_time=timestamp)
+        booking_ids = await self.db.bookings.get_expired(current_time=timestamp)
 
-            if not booking_ids:
-                return
+        if not booking_ids:
+            return
 
-            await db.event_seats.release_seats_bulk(booking_ids)
-            await db.bookings.delete_by_ids(booking_ids)
+        await self.db.event_seats.release_seats_bulk(booking_ids)
+        await self.db.bookings.delete_by_ids(booking_ids)
+        await self.db.commit()
 
     async def _prepare_booking(
             self,
