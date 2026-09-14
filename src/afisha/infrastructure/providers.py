@@ -1,8 +1,9 @@
 from collections.abc import AsyncIterator
 
 from dishka import Provider, Scope, provide
+from faststream.kafka import KafkaBroker
 
-from afisha.core.config import ConnectorsConfig, PostgresConfig, RedisConfig
+from afisha.core.config import ConnectorsConfig, PostgresConfig, RedisConfig, KafkaConfig
 from afisha.infrastructure.api_connectors.internal.payment import PaymentConnector
 from afisha.infrastructure.api_connectors.internal.protection import ProtectionConnector
 from afisha.infrastructure.postgres.manager import DatabaseManager, PostgresClient
@@ -10,6 +11,15 @@ from afisha.infrastructure.postgres.queue import PostgresEventQueue
 from afisha.infrastructure.redis.cache_repo import CacheRepo
 from afisha.infrastructure.redis.manager import RedisManager, create_redis_manager
 from afisha.infrastructure.tasks.publisher import TaskPublisher
+
+
+class KafkaProvider(Provider):
+    @provide(scope=Scope.APP)
+    async def get_kafka(self, config: KafkaConfig) -> KafkaBroker:
+        return KafkaBroker(
+            bootstrap_servers=config.bootstrap_servers,
+            linger_ms=50
+        )
 
 
 class PostgresProvider(Provider):

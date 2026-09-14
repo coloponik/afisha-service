@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from dishka import Provider, Scope, provide
+from faststream.kafka import KafkaBroker
 
 from afisha.core.config import (
     AppConfig,
@@ -8,7 +9,7 @@ from afisha.core.config import (
     ConnectorsConfig,
     PostgresConfig,
     ProjectConfig,
-    Settings, RedisConfig, ReportConfig,
+    Settings, RedisConfig, ReportConfig, KafkaConfig,
 )
 from afisha.infrastructure.api_connectors.internal.payment import PaymentConnector
 from afisha.infrastructure.api_connectors.internal.protection import ProtectionConnector
@@ -19,6 +20,7 @@ from afisha.infrastructure.tasks.publisher import TaskPublisher
 from afisha.services.booking import BookingService
 from afisha.services.event import EventService
 from afisha.services.event_analytics import EventAnalyticsService
+from afisha.services.purchase_simulator import PurchaseSimulationService
 from afisha.services.report import ReportService
 
 
@@ -58,6 +60,10 @@ class ConfigProvider(Provider):
     @provide(scope=Scope.APP)
     def get_booking_config(self) -> BookingConfig:
         return self._settings.booking
+
+    @provide(scope=Scope.APP)
+    def get_kafka_config(self) -> KafkaConfig:
+        return self._settings.kafka
 
 
 class ServiceProvider(Provider):
@@ -100,6 +106,17 @@ class ServiceProvider(Provider):
             protection_connector=protection_connector,
             task_publisher=task_publisher,
             booking_ttl=timedelta(minutes=config.booking_ttl_minutes)
+        )
+
+    @provide(scope=Scope.APP)
+    def get_purchase_simulation_service(
+            self,
+            broker: KafkaBroker,
+            config: KafkaConfig
+    ) -> PurchaseSimulationService:
+        return PurchaseSimulationService(
+            broker=broker,
+            config=config
         )
 
     @provide(scope=Scope.REQUEST)

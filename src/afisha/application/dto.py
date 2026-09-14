@@ -181,6 +181,14 @@ class PaymentCompleted(BaseModel):
     transaction_id: str
 
 
+class PurchaseEvent(BaseModel):
+    payment_id: str
+    event_id: int
+    tickets_count: int
+    total_amount: int
+    paid_at: datetime
+
+
 class ReportData(BaseModel):
     model_config = ConfigDict(from_attributes=True, frozen=True)
     id: str
