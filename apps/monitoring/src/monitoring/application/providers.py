@@ -1,6 +1,7 @@
 from dishka import Provider, provide, Scope
 
 from monitoring.core.config import Settings, AppConfig, PostgresConfig, KafkaConfig
+from monitoring.infrastructure.postgres.manager import DatabaseManager
 from monitoring.services.purchase_aggregation import PurchaseAggregationService
 
 
@@ -27,6 +28,9 @@ class ConfigProvider(Provider):
 
 
 class ServiceProvider(Provider):
-    @provide(scope=Scope.APP)
-    def get_purchase_aggregation_service(self) -> PurchaseAggregationService:
-        return PurchaseAggregationService()
+    @provide(scope=Scope.REQUEST)
+    def get_purchase_aggregation_service(
+            self,
+            db: DatabaseManager
+    ) -> PurchaseAggregationService:
+        return PurchaseAggregationService(db=db)

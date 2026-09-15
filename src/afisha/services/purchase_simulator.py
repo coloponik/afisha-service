@@ -15,11 +15,9 @@ class PurchaseSimulationService:
         self.config = config
         self.publish_batch_size = 10
 
-    async def run_simulation(self, events_count: int = 100):
-        remaining = events_count
-
-        while remaining > 0:
-            batch_size = min(random.randint(10, 30), remaining)
+    async def run_simulation(self) -> None:
+        while True:
+            batch_size = random.randint(1, 30)
 
             events = [
                 self._generate_purchase_event()
@@ -27,8 +25,6 @@ class PurchaseSimulationService:
             ]
 
             await self._publish_event_batch(events)
-
-            remaining -= batch_size
 
             await asyncio.sleep(random.randint(1, 3))
 

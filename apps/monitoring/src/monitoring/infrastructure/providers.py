@@ -1,6 +1,6 @@
 from collections.abc import AsyncIterator
 
-from dishka import Provider, provide, Scope
+from dishka import Provider, provide, Scope, AsyncContainer
 from faststream.kafka import KafkaBroker
 
 from monitoring.core.config import PostgresConfig, KafkaConfig
@@ -10,8 +10,12 @@ from monitoring.infrastructure.postgres.manager import PostgresClient, DatabaseM
 
 class KafkaProvider(Provider):
     @provide(scope=Scope.APP)
-    async def get_kafka_broker(self, config: KafkaConfig) -> KafkaBroker:
-        return create_kafka_broker(config)
+    async def get_kafka_broker(
+            self,
+            config: KafkaConfig,
+            container: AsyncContainer
+    ) -> KafkaBroker:
+        return create_kafka_broker(config, container)
 
 
 class PostgresProvider(Provider):

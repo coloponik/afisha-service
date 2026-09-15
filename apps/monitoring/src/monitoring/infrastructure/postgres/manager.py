@@ -9,6 +9,8 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from monitoring.core.config import PostgresConfig
+from monitoring.infrastructure.postgres.repositories.event_payment_activities import \
+    EventPaymentActivityRepo
 
 
 class PostgresClient:
@@ -16,8 +18,6 @@ class PostgresClient:
         self._engine: AsyncEngine = create_async_engine(
             config.url,
             echo=config.echo,
-            pool_size=config.pool_size,
-            max_overflow=config.max_overflow,
             pool_pre_ping=True
         )
 
@@ -72,4 +72,7 @@ class DatabaseManager:
     async def rollback(self) -> None:
         await self.session.rollback()
 
-    
+    @property
+    def event_payment_activities(self) -> EventPaymentActivityRepo:
+        return EventPaymentActivityRepo(self.session)
+
