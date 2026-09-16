@@ -82,6 +82,11 @@ class BookingConfig(BaseModel):
     booking_ttl_minutes: int = 15
 
 
+class KafkaConfig(BaseModel):
+    bootstrap_servers: str = "localhost:9092"
+    purchase_topic: str = "tickets.purchased"
+
+
 class Settings(BaseSettings):
     app: AppConfig
     project: ProjectConfig
@@ -91,6 +96,7 @@ class Settings(BaseSettings):
     taskiq: TaskiqConfig
     connectors: ConnectorsConfig
     booking: BookingConfig
+    kafka: KafkaConfig
 
     model_config = SettingsConfigDict(
         env_file=os.getenv("ENV_FILE", ".env.dev"),

@@ -7,7 +7,7 @@ from afisha.infrastructure.providers import (
     PostgresProvider,
     RedisProvider,
     CacheProvider,
-    PostgresEventQueueProvider, TaskPublisherProvider
+    PostgresEventQueueProvider, TaskPublisherProvider, KafkaProvider
 )
 
 
@@ -20,5 +20,6 @@ def create_container(settings: Settings) -> AsyncContainer:
         CacheProvider(),
         PostgresEventQueueProvider(),
         ConnectorsProvider(),
-        TaskPublisherProvider()
+        TaskPublisherProvider(),
+        KafkaProvider()
     )
