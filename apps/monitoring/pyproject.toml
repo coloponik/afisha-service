@@ -12,10 +12,21 @@ dependencies = [
     "faststream[kafka]>=0.7.5",
     "pydantic>=2.13.4",
     "pydantic-settings>=2.14.2",
+    "pytest>=9.1.1",
     "sqlalchemy>=2.0.41",
     "uvicorn>=0.35.0",
     "uvloop>=0.22.1",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest-asyncio>=1.4.0",
+    "ruff==0.12.2",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["."]
 
 [build-system]
 requires = ["hatchling"]

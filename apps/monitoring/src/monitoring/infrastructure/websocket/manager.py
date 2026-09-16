@@ -9,6 +9,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass(frozen=True)
 class WebsocketClient:
     ws: WebSocket
