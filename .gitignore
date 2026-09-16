@@ -21,3 +21,6 @@ wheels/
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Локальное хранилище
+storage/reports/*

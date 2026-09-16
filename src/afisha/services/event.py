@@ -6,9 +6,9 @@ from redis.exceptions import LockError
 
 from afisha.application.dto import EventData, EventRead
 from afisha.exceptions import LockTimeoutError
-from afisha.infrastracture.postgres.manager import DatabaseManager
-from afisha.infrastracture.postgres.queue import PostgresEventQueue
-from afisha.infrastracture.redis.cache_repo import CacheRepo
+from afisha.infrastructure.postgres.manager import DatabaseManager
+from afisha.infrastructure.postgres.queue import PostgresEventQueue
+from afisha.infrastructure.redis.cache_repo import CacheRepo
 
 
 logger = logging.getLogger(__name__)

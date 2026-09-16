@@ -1,18 +1,18 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
+from afisha.core.config import PostgresConfig
+from afisha.infrastructure.postgres.repositories.bookings import BookingRepo
+from afisha.infrastructure.postgres.repositories.event_seats import EventSeatRepo
+from afisha.infrastructure.postgres.repositories.events import EventRepo
+from afisha.infrastructure.postgres.repositories.reports import ReportRepo
+from afisha.infrastructure.postgres.repositories.seats import SeatRepo
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
-
-from afisha.core.config import PostgresConfig
-from afisha.infrastracture.postgres.repositories.bookings import BookingRepo
-from afisha.infrastracture.postgres.repositories.event_seats import EventSeatRepo
-from afisha.infrastracture.postgres.repositories.events import EventRepo
-from afisha.infrastracture.postgres.repositories.seats import SeatRepo
 
 
 class PostgresClient:
@@ -87,6 +87,10 @@ class DatabaseManager:
     @property
     def events(self) -> EventRepo:
         return EventRepo(self.session)
+
+    @property
+    def reports(self) -> ReportRepo:
+        return ReportRepo(self.session)
 
     @property
     def seats(self) -> SeatRepo:

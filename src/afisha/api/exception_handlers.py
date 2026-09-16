@@ -10,7 +10,7 @@ from afisha.exceptions import (
     SeatAlreadyReservedError,
     SeatAlreadySoldError,
     SeatsNotFoundError,
-    LockTimeoutError
+    LockTimeoutError, ReportPersistenceError
 )
 
 DOMAIN_ERROR_RESPONSES: dict[type[DomainError], tuple[int, str]] = {
@@ -45,6 +45,10 @@ DOMAIN_ERROR_RESPONSES: dict[type[DomainError], tuple[int, str]] = {
     PaymentUnavailableError: (
         status.HTTP_503_SERVICE_UNAVAILABLE,
         "Payment service is temporarily unavailable"
+    ),
+    ReportPersistenceError: (
+        status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "Failed to create event report metadata"
     )
 }
 

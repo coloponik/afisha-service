@@ -8,16 +8,18 @@ from afisha.core.config import (
     ConnectorsConfig,
     PostgresConfig,
     ProjectConfig,
-    Settings, RedisConfig,
+    Settings, RedisConfig, ReportConfig,
 )
-from afisha.infrastracture.api_connectors.internal.payment import PaymentConnector
-from afisha.infrastracture.api_connectors.internal.protection import ProtectionConnector
-from afisha.infrastracture.postgres.manager import DatabaseManager
-from afisha.infrastracture.postgres.queue import PostgresEventQueue
-from afisha.infrastracture.redis.cache_repo import CacheRepo
+from afisha.infrastructure.api_connectors.internal.payment import PaymentConnector
+from afisha.infrastructure.api_connectors.internal.protection import ProtectionConnector
+from afisha.infrastructure.postgres.manager import DatabaseManager
+from afisha.infrastructure.postgres.queue import PostgresEventQueue
+from afisha.infrastructure.redis.cache_repo import CacheRepo
+from afisha.infrastructure.tasks.publisher import TaskPublisher
 from afisha.services.booking import BookingService
 from afisha.services.event import EventService
 from afisha.services.event_analytics import EventAnalyticsService
+from afisha.services.report import ReportService
 
 
 class ConfigProvider(Provider):
@@ -46,6 +48,10 @@ class ConfigProvider(Provider):
         return self._settings.redis
 
     @provide(scope=Scope.APP)
+    def get_report_config(self) -> ReportConfig:
+        return self._settings.report
+
+    @provide(scope=Scope.APP)
     def get_connectors_config(self) -> ConnectorsConfig:
         return self._settings.connectors
 
@@ -71,10 +77,12 @@ class ServiceProvider(Provider):
     @provide(scope=Scope.REQUEST)
     def get_event_analytics_service(
             self,
-            db: DatabaseManager
+            db: DatabaseManager,
+            task_publisher: TaskPublisher
     ) -> EventAnalyticsService:
         return EventAnalyticsService(
-            db=db
+            db=db,
+            task_publisher=task_publisher
         )
 
     @provide(scope=Scope.REQUEST)
@@ -83,11 +91,26 @@ class ServiceProvider(Provider):
             db: DatabaseManager,
             payment_connector: PaymentConnector,
             protection_connector: ProtectionConnector,
+            task_publisher: TaskPublisher,
             config: BookingConfig
     ) -> BookingService:
         return BookingService(
             db=db,
             payment_connector=payment_connector,
             protection_connector=protection_connector,
+            task_publisher=task_publisher,
             booking_ttl=timedelta(minutes=config.booking_ttl_minutes)
+        )
+
+    @provide(scope=Scope.REQUEST)
+    def get_report_service(
+            self,
+            db: DatabaseManager,
+            config: ReportConfig,
+            task_publisher: TaskPublisher
+    ) -> ReportService:
+        return ReportService(
+            db=db,
+            config=config,
+            task_publisher=task_publisher
         )

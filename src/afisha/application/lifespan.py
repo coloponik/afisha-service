@@ -6,9 +6,9 @@ from dishka import AsyncContainer, Scope
 from fastapi import FastAPI
 from starlette.types import Lifespan
 
-from afisha.infrastracture.postgres.add_event_data import add_event_data_to_db
-from afisha.infrastracture.postgres.manager import PostgresClient
-from afisha.infrastracture.postgres.queue import PostgresEventQueue
+from afisha.infrastructure.postgres.add_event_data import add_event_data_to_db
+from afisha.infrastructure.postgres.manager import PostgresClient
+from afisha.infrastructure.postgres.queue import PostgresEventQueue
 
 logger = logging.getLogger(__name__)
 

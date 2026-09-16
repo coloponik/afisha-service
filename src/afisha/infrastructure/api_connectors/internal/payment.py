@@ -1,5 +1,5 @@
-from afisha.infrastracture.api_connectors.base import BaseHTTPConnector
-from afisha.infrastracture.api_connectors.schemas import CalculatedPaymentData
+from afisha.infrastructure.api_connectors.base import BaseHTTPConnector
+from afisha.infrastructure.api_connectors.schemas import CalculatedPaymentData
 
 
 class PaymentConnector(BaseHTTPConnector):

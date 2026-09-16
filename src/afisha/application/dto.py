@@ -3,7 +3,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from afisha.infrastracture.postgres.models import BookingStatus, SeatStatus
+from afisha.infrastructure.postgres.models import BookingStatus, SeatStatus
 
 
 class LocationRead(BaseModel):
@@ -144,6 +144,13 @@ class ProtectionQuote(BaseModel):
     description: str | None = None
 
 
+class ProtectionRetryData(BaseModel):
+    booking_id: int
+    ticket_amount: int
+    event_category: str
+    event_starts_at: datetime
+
+
 class CheckoutBooking(BaseModel):
     id: int
     event_title: str
@@ -172,3 +179,17 @@ class PaymentCompleted(BaseModel):
     status: BookingStatus
     charged_amount: int
     transaction_id: str
+
+
+class ReportData(BaseModel):
+    model_config = ConfigDict(from_attributes=True, frozen=True)
+    id: str
+    event_id: int
+    status: str
+    file_path: str | None = None
+    payload: dict
+    error: str | None = None
+    claim_version: int
+    created_at: datetime
+    updated_at: datetime
+    completed_at: datetime | None = None

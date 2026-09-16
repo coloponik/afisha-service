@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends, Header
+from fastapi import Depends, Header, Path
 
 
 def get_current_user_id(x_user_id: Annotated[int, Header()]) -> int:
@@ -8,3 +8,5 @@ def get_current_user_id(x_user_id: Annotated[int, Header()]) -> int:
 
 
 CurrentUserId = Annotated[int, Depends(get_current_user_id)]
+
+EventId = Annotated[int, Path(gt=0)]

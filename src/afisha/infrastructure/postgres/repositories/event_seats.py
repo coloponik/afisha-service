@@ -3,13 +3,13 @@ from datetime import datetime
 from sqlalchemy import Float, Numeric, and_, cast, func, or_, select, update
 
 from afisha.application.dto import OccupancyRead
-from afisha.infrastracture.postgres.models import (
+from afisha.infrastructure.postgres.models import (
     Booking,
     BookingStatus,
     EventSeat,
     SeatStatus,
 )
-from afisha.infrastracture.postgres.repositories.base import BaseRepo
+from afisha.infrastructure.postgres.repositories.base import BaseRepo
 
 
 class EventSeatRepo(BaseRepo):
@@ -54,6 +54,19 @@ class EventSeatRepo(BaseRepo):
 
         await self.session.execute(stmt)
 
+    async def release_seats_bulk(self, booking_ids: list[int]) -> None:
+        stmt = (
+            update(EventSeat)
+            .where(EventSeat.booking_id.in_(booking_ids))
+            .values(
+                status=SeatStatus.available,
+                reserved_until=None,
+                booking_id=None
+            )
+        )
+
+        await self.session.execute(stmt)
+
     async def get_occupancy(self, event_id: int) -> OccupancyRead:
         query = (
             select(
@@ -88,27 +101,30 @@ class EventSeatRepo(BaseRepo):
                 )
                 .label("sold_seats"),
 
-                func.round(
-                    (
-                        cast(
-                            func.count(EventSeat.id)
-                            .filter(
-                                or_(
-                                    EventSeat.status == SeatStatus.sold,
-                                    and_(
-                                        EventSeat.status == SeatStatus.reserved,
-                                        EventSeat.reserved_until > func.now(),
-                                        Booking.status == BookingStatus.pending_payment
+                func.coalesce(
+                    func.round(
+                        (
+                            cast(
+                                func.count(EventSeat.id)
+                                .filter(
+                                    or_(
+                                        EventSeat.status == SeatStatus.sold,
+                                        and_(
+                                            EventSeat.status == SeatStatus.reserved,
+                                            EventSeat.reserved_until > func.now(),
+                                            Booking.status == BookingStatus.pending_payment
+                                        )
                                     )
-                                )
-                            ),
-                            Numeric
-                        )
-                        /
-                        func.nullif(func.count(EventSeat.id), 0)
-                        * 100
+                                ),
+                                Numeric
+                            )
+                            /
+                            func.nullif(func.count(EventSeat.id), 0)
+                            * 100
+                        ),
+                        2
                     ),
-                    2
+                    0
                 )
                 .cast(Float)
                 .label("occupancy_percent")

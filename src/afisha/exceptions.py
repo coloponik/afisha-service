@@ -55,5 +55,9 @@ class PostgresEventQueueError(InfrastructureError):
     pass
 
 
+class ReportPersistenceError(InfrastructureError):
+    pass
+
+
 class EventViewPersistenceError(PostgresEventQueueError):
     pass

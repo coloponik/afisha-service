@@ -2,7 +2,7 @@ from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, Request
 
-from afisha.api.dependencies import CurrentUserId
+from afisha.api.dependencies import CurrentUserId, EventId
 from afisha.application.dto import (
     BookingCreate,
     CheckoutResponse,
@@ -23,7 +23,7 @@ async def list_events() -> list[EventData]:
 
 @router.get("/{event_id}")
 async def get_event(
-        event_id: int,
+        event_id: EventId,
         request: Request,
         service: FromDishka[EventService]
 ) -> EventData:
@@ -39,7 +39,7 @@ async def list_event_seats(event_id: int) -> list[EventSeatRead]:
 
 @router.post("/{event_id}/checkout")
 async def prepare_checkout(
-    event_id: int,
+    event_id: EventId,
     payload: BookingCreate,
     user_id: CurrentUserId,
     service: FromDishka[BookingService]

@@ -1,8 +1,8 @@
 from sqlalchemy import select
 
 from afisha.application.dto import SeatRead
-from afisha.infrastracture.postgres.models import Seat
-from afisha.infrastracture.postgres.repositories.base import BaseRepo
+from afisha.infrastructure.postgres.models import Seat
+from afisha.infrastructure.postgres.repositories.base import BaseRepo
 
 
 class SeatRepo(BaseRepo):

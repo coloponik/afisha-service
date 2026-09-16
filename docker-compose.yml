@@ -1,3 +1,26 @@
+x-afisha-env: &afisha_env
+  APP__HOST: 0.0.0.0
+  APP__PORT: 8000
+  APP__RELOAD: true
+  POSTGRES__HOST: db
+  POSTGRES__PORT: 5432
+  POSTGRES__USER: postgres
+  POSTGRES__PASSWORD: postgres
+  POSTGRES__DATABASE: postgres
+  POSTGRES__ECHO: false
+  POSTGRES__POOL_SIZE: 10
+  POSTGRES__MAX_OVERFLOW: 20
+  REDIS__HOST: redis
+  REDIS__PORT: 6379
+  REDIS__DATABASE: 0
+  REPORT__STORAGE_PATH: ./storage/reports
+  TASKIQ__ADMIN_URL: http://afisha-taskiq-admin:3000
+  CONNECTORS__PAYMENT__BASE_URL: http://payment-api:9001
+  CONNECTORS__PROTECTION__BASE_URL: http://protection-api:9002
+  PROJECT__NAME: Afisha
+  PROJECT__ENV: development
+  BOOKING__TTL_MINUTES: 15
+
 services:
   db:
     image: postgres:17-alpine
@@ -47,6 +70,54 @@ services:
       timeout: 3s
       retries: 10
 
+  afisha-taskiq-admin:
+    image: ghcr.io/taskiq-python/taskiq-admin:latest
+    ports:
+      - "3000:3000"
+    environment:
+      TASKIQ_ADMIN_API_TOKEN: supersecret
+    volumes:
+      - afisha_taskiq_admin_data:/usr/database/
+
+  afisha-taskiq-cpu-worker:
+    build:
+      context: .
+    command: taskiq worker afisha.infrastructure.tasks.taskiq_app:broker_cpu afisha.infrastructure.tasks.taskiq_tasks --log-level INFO --workers 2 --max-async-tasks 1 --max-prefetch 1
+    environment:
+      <<: *afisha_env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      afisha-taskiq-admin:
+        condition: service_started
+    volumes:
+      - ./storage/reports:/app/storage/reports
+
+  afisha-taskiq-io-worker:
+    build:
+      context: .
+    command: taskiq worker afisha.infrastructure.tasks.taskiq_app:broker_io afisha.infrastructure.tasks.taskiq_tasks --log-level INFO --workers 1
+    environment:
+      <<: *afisha_env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      afisha-taskiq-admin:
+        condition: service_started
+
+  afisha-taskiq-scheduler:
+    build:
+      context: .
+    command: taskiq scheduler afisha.infrastructure.tasks.taskiq_app:scheduler afisha.infrastructure.tasks.taskiq_tasks
+    environment:
+      <<: *afisha_env
+    depends_on:
+      redis:
+        condition: service_healthy
 #  app:
 #    build: .
 #    ports:
@@ -66,3 +137,4 @@ services:
 
 volumes:
   postgres_data:
+  afisha_taskiq_admin_data:
