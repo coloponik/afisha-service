@@ -2,7 +2,10 @@ from dishka import Provider, provide, Scope
 
 from monitoring.core.config import Settings, AppConfig, PostgresConfig, KafkaConfig
 from monitoring.infrastructure.postgres.manager import DatabaseManager
+from monitoring.infrastructure.queues.purchase_aggregates import PurchaseAggregatesQueue
+from monitoring.infrastructure.websocket.manager import WebsocketManager
 from monitoring.services.purchase_aggregation import PurchaseAggregationService
+from monitoring.services.websocket_purchase_broadcaster import WebSocketPurchaseBroadcaster
 
 
 class ConfigProvider(Provider):
@@ -28,9 +31,23 @@ class ConfigProvider(Provider):
 
 
 class ServiceProvider(Provider):
+    @provide(scope=Scope.APP)
+    def get_websocket_purchase_broadcaster(
+            self,
+            ws_manager: WebsocketManager,
+            queue: PurchaseAggregatesQueue
+    ) -> WebSocketPurchaseBroadcaster:
+        return WebSocketPurchaseBroadcaster(
+            ws_manager=ws_manager,
+            queue=queue,
+        )
+
     @provide(scope=Scope.REQUEST)
     def get_purchase_aggregation_service(
             self,
             db: DatabaseManager
     ) -> PurchaseAggregationService:
-        return PurchaseAggregationService(db=db)
+        return PurchaseAggregationService(
+            db=db
+        )
+

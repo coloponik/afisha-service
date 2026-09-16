@@ -4,6 +4,7 @@ from faststream.kafka import KafkaBroker, KafkaMessage
 
 from monitoring.core.config import KafkaConfig
 from monitoring.infrastructure.kafka.schemas import PurchaseEvent
+from monitoring.infrastructure.queues.purchase_aggregates import PurchaseAggregatesQueue
 from monitoring.services.purchase_aggregation import PurchaseAggregationService
 
 
@@ -27,8 +28,14 @@ def create_kafka_broker(config: KafkaConfig, container: AsyncContainer) -> Kafka
     ) -> None:
         async with container(scope=Scope.REQUEST) as request_container:
             purchase_aggregation_service = await request_container.get(PurchaseAggregationService)
-            await purchase_aggregation_service.process(messages)
+            aggregates_queue = await request_container.get(PurchaseAggregatesQueue)
+
+            event_aggregates = await purchase_aggregation_service.process(messages)
+
             await msg.ack()
+
+            if event_aggregates is not None:
+                await aggregates_queue.put(event_aggregates)
 
     return broker
 

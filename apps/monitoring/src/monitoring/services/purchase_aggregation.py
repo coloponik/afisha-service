@@ -1,20 +1,27 @@
+import asyncio
 from typing import Any
 from uuid import uuid4
 
 from monitoring.infrastructure.postgres.manager import DatabaseManager
+from monitoring.services.websocket_purchase_broadcaster import WebSocketPurchaseBroadcaster
 
 
 class PurchaseAggregationService:
-    def __init__(self, db: DatabaseManager) -> None:
+    def __init__(
+            self,
+            db: DatabaseManager
+    ) -> None:
         self.db = db
 
-    async def process(self, events: list[Any]) -> None:
+    async def process(self, events: list[Any]) -> list[dict] | None:
         event_aggregates = self._prepare_event_aggregates(events)
 
         if not event_aggregates:
             return
 
         await self._store_event_aggregates(event_aggregates)
+
+        return event_aggregates
 
     def _prepare_event_aggregates(
             self,
